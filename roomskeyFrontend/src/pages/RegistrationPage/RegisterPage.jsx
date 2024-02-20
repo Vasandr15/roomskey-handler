@@ -133,7 +133,7 @@ const RegistrationForm = () => {
 
                 </Form>
                 <div style={{textAlign: 'center'}}>
-                    Уже есть аккаунт? <Link to="/login">Войти</Link>
+                    Уже есть аккаунт? <a>Войти</a> {/*add link*/}
                 </div>
             </Card>
         </div>
