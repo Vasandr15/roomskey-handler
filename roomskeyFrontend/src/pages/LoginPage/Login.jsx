@@ -70,7 +70,7 @@ const LoginForm = () => {
 
                 </Form>
                 <div style={{textAlign: 'center'}}>
-                    Еще нет аккаунта? <Link to="/registration">Зарегестрироваться</Link>
+                    Еще нет аккаунта? <a>Зарегестрироваться</a> {/*add link*/}
                 </div>
             </Card>
         </div>);
