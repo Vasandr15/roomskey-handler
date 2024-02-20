@@ -10,6 +10,9 @@ function setHTTPStatus($status = "200", $message = null)
         case "200":
             $status = "HTTP/1.0 200 OK";
             break;
+        case "201":
+            $status = "HTTP/1.0 201 Create";
+            break;
         case "400":
             $status = "HTTP/1.0 400 Bad Request";
             break;
