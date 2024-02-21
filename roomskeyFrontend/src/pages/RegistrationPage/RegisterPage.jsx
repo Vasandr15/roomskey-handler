@@ -1,8 +1,16 @@
 import {useEffect, useState} from 'react';
 import {Link} from "react-router-dom";
 import {Form, Input, Button, Card, Flex, Typography} from 'antd';
+import styles from './register.module.css'
+import {
+    confirmPasswordValidation,
+    emailValidation,
+    middleNameValidationRules,
+    nameValidationRules, passwordValidation,
+    surnameValidationRules
+} from "../../consts/validations.js";
+
 const {Title} = Typography;
-import styles from'./register.module.css'
 
 const RegistrationForm = () => {
     const [form] = Form.useForm();
@@ -25,111 +33,39 @@ const RegistrationForm = () => {
 
     return (
         <div className={styles.formContainer}>
-            <Card className={styles.antCard}>
-                <Form
-                    form={form}
-                    name="registration"
-                    onFinish={onFinish}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    layout="vertical"
+            <Card className={styles.antCard} justify={"center"} align={"center"}>
+                <Form form={form} name="registration" onFinish={onFinish}  layout="vertical"
+                      initialValues={{remember: true,}}
                 >
                     <Title>Регистрация</Title>
-                    <Flex gap={"small"} justify={"space-between"} align={"center"}>
-                        <Form.Item
-                            name="name"
-                            label="Имя"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Введите своё имя',
-                                },
-                            ]}
-                        >
-                            <Input/>
+                    <Flex justify="space-between" align="center" wrap="wrap">
+                        <Form.Item name="surname" label="Фамилия" rules={surnameValidationRules}>
+                            <Input />
                         </Form.Item>
-                        <Form.Item
-                            name="surname"
-                            label="Фамилия"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Введите свою фамилию',
-                                },
-                            ]}
-                        >
-                            <Input/>
+                        <Form.Item name="name" label="Имя" rules={nameValidationRules}>
+                            <Input />
                         </Form.Item>
-                        <Form.Item
-                            name="middleName"
-                            label="Отчество"
-                        >
-                            <Input/>
+                        <Form.Item name="middleName" label="Отчество" rules={middleNameValidationRules}>
+                            <Input />
                         </Form.Item>
                     </Flex>
-
-
-                    <Form.Item
-                        name="email"
-                        label="Email"
-                        rules={[
-                            {
-                                type: 'email',
-                                message: 'Введите действующий E-mail',
-                            },
-                            {
-                                required: true,
-                                message: 'Введите свой E-mail',
-                            },
-                        ]}
-                    >
+                    <Form.Item name="email" label="Email" rules={emailValidation}>
                         <Input/>
                     </Form.Item>
-
-                    <Form.Item
-                        name="password"
-                        label="Пароль"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Введите свой пароль',
-                            },
-                        ]}
-                        hasFeedback
+                    <Form.Item name="password" label="Пароль" hasFeedback rules={passwordValidation}>
+                        <Input.Password/>
+                    </Form.Item>
+                    <Form.Item name="confirm" label="Потдверждение пароля" dependencies={['password']} hasFeedback
+                        rules={confirmPasswordValidation}
                     >
                         <Input.Password/>
                     </Form.Item>
 
-                    <Form.Item
-                        name="confirm"
-                        label="Потдверждение пароля"
-                        dependencies={['password']}
-                        hasFeedback
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Подтвердите свой пароль',
-                            },
-                            ({getFieldValue}) => ({
-                                validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Пароли должны совпадать'));
-                                },
-                            }),
-                        ]}
-                    >
-                        <Input.Password/>
-                    </Form.Item>
-                    <Flex justify={"center"} align={"center"}>
-                        <Form.Item>
+                        <Form.Item >
                             <Button type="primary" htmlType="submit" loading={loading}>
                                 Зарегестрироваться
                             </Button>
                         </Form.Item>
-                    </Flex>
 
                 </Form>
                 <div style={{textAlign: 'center'}}>
