@@ -2,13 +2,7 @@ import {useEffect, useState} from 'react';
 import {Link} from "react-router-dom";
 import {Form, Input, Button, Card, Flex, Typography} from 'antd';
 import styles from './register.module.css'
-import {
-    confirmPasswordValidation,
-    emailValidation,
-    middleNameValidationRules,
-    nameValidationRules, passwordValidation,
-    surnameValidationRules
-} from "../../consts/validations.js";
+import {Validations} from "../../consts/validations.js";
 
 const {Title} = Typography;
 
@@ -33,40 +27,40 @@ const RegistrationForm = () => {
 
     return (
         <div className={styles.formContainer}>
-            <Card className={styles.antCard} justify={"center"} align={"center"}>
-                <Form form={form} name="registration" onFinish={onFinish}  layout="vertical"
+            <Card className={styles.antCard}>
+                <Form form={form} name="registration" onFinish={onFinish} layout="vertical"
                       initialValues={{remember: true,}}
                 >
                     <Title>Регистрация</Title>
                     <Flex justify="space-between" align="center" wrap="wrap">
-                        <Form.Item name="surname" label="Фамилия" rules={surnameValidationRules}>
-                            <Input />
+                        <Form.Item name="surname" label="Фамилия" rules={Validations.surnameValidationRules()}>
+                            <Input/>
                         </Form.Item>
-                        <Form.Item name="name" label="Имя" rules={nameValidationRules}>
-                            <Input />
+                        <Form.Item name="name" label="Имя" rules={Validations.nameValidationRules()}>
+                            <Input/>
                         </Form.Item>
-                        <Form.Item name="middleName" label="Отчество" rules={middleNameValidationRules}>
-                            <Input />
+                        <Form.Item name="middleName" label="Отчество" rules={Validations.middleNameValidationRules()}>
+                            <Input/>
                         </Form.Item>
                     </Flex>
-                    <Form.Item name="email" label="Email" rules={emailValidation}>
+                    <Form.Item name="email" label="Email" rules={Validations.emailValidation()}>
                         <Input/>
                     </Form.Item>
-                    <Form.Item name="password" label="Пароль" hasFeedback rules={passwordValidation}>
+                    <Form.Item name="password" label="Пароль" hasFeedback rules={Validations.passwordValidation()}>
                         <Input.Password/>
                     </Form.Item>
                     <Form.Item name="confirm" label="Потдверждение пароля" dependencies={['password']} hasFeedback
-                        rules={confirmPasswordValidation}
+                               rules={Validations.confirmPasswordValidation()}
                     >
                         <Input.Password/>
                     </Form.Item>
-
-                        <Form.Item >
+                    <Flex justify={"center"} align={"center"}>
+                        <Form.Item>
                             <Button type="primary" htmlType="submit" loading={loading}>
                                 Зарегестрироваться
                             </Button>
                         </Form.Item>
-
+                    </Flex>
                 </Form>
                 <div style={{textAlign: 'center'}}>
                     Уже есть аккаунт? <a>Войти</a> {/*add link*/}
