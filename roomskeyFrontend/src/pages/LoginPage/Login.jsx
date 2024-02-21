@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {Form, Input, Button, Card, Flex, Typography} from 'antd';
 import {Link} from "react-router-dom";
 import styles from './login.module.css'
+import {Validations} from "../../consts/validations.js";
 
 const {Title} = Typography;
 const LoginForm = () => {
@@ -27,39 +28,14 @@ const LoginForm = () => {
     return (
         <div className={styles.formContainer}>
             <Card className={styles.antCard}>
-                <Form
-                    form={form}
-                    name="login"
-                    onFinish={onFinish}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    layout="vertical"
-                >
+                <Form form={form} name="login" onFinish={onFinish} layout="vertical" initialValues={{remember: true,}}>
                     <Title>Вход</Title>
-                    <Form.Item
-                        name="email"
-                        label="Email"
-                        rules={[{
-                            type: 'email', message: 'Введите действующий E-mail',
-                        }, {
-                            required: true, message: 'Введите свой E-mail',
-                        },]}
-                    >
+                    <Form.Item name="email" label="Email" rules={Validations.emailValidation()}>
                         <Input/>
                     </Form.Item>
-
-                    <Form.Item
-                        name="password"
-                        label="Пароль"
-                        rules={[{
-                            required: true, message: 'Введите свой пароль',
-                        },]}
-                        hasFeedback
-                    >
+                    <Form.Item name="password" label="Пароль" hasFeedback rules={Validations.passwordValidation()}>
                         <Input.Password/>
                     </Form.Item>
-
                     <Flex justify={"center"} align={"center"}>
                         <Form.Item>
                             <Button type="primary" htmlType="submit" loading={loading}>
@@ -67,7 +43,6 @@ const LoginForm = () => {
                             </Button>
                         </Form.Item>
                     </Flex>
-
                 </Form>
                 <div style={{textAlign: 'center'}}>
                     Еще нет аккаунта? <a>Зарегестрироваться</a> {/*add link*/}
