@@ -1,7 +1,6 @@
 import {Route, Router, Routes} from "react-router";
-import {routes} from './consts/routes.js';
 import NotFoundPage from "./pages/NotFoundPage.jsx";
-import RequestsPage from "./pages/RequestsPage.jsx";
+import RequestsPage from "./pages/RequestsPage/RequestsPage.jsx";
 import {BrowserRouter} from "react-router-dom";
 export default function App() {
     return (
