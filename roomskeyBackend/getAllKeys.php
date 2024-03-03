@@ -104,7 +104,6 @@ function route($method, $urlList, $requestData)
 
     // Обработка результатов запроса
     while ($keyRow = pg_fetch_assoc($keysResult)) {
-        echo 132;
         $keyId = trim($keyRow['key_id']); // Используйте trim() здесь
     
         // Если ключа еще нет в массиве, добавляем его
