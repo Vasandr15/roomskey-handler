@@ -1,78 +1,8 @@
 <?php
-
-include_once 'helperFunctions/headers.php';
-    
-global $Link;
-
-function getData($method)
-{
-    $data = new stdClass();
-    if ($method != "GET")
-    {
-        $data -> body = json_decode(file_get_contents('php://input'));
-    }
-    $data->paramaters = [];
-        $dataGet = $_GET;
-        foreach ($dataGet as $key => $value)
-        {
-            if ($key != "q")
-            {
-                $data->paramatersq[$key] = $value;
-            }
-        }
-        return $data;
-}
-function getMethod()
-{
-    return $_SERVER['REQUEST_METHOD'];
-}
-
-header('Content-type: application/json');
-global $Link;
-$host = 'localhost';
-$dbname = 'db';
-$username = 'postgres';
-$password = 'postgres';
-
-$conn_string = "host=$host dbname=$dbname user=$username password=$password";
-
-$Link = pg_connect($conn_string);
-
-if (!$Link) {
-    echo "Ошибка подключения к базе данных.\n";
-    exit;
-}
-
-$url = isset($_GET['q']) ? $_GET['q'] : '';
-
-
-$url = rtrim($url, '/');
-$urlList = explode('/', $url);
-
-$object = $urlList[1];
-$router = $urlList[2];
-$requestData = getData(getMethod());
-$method = getMethod();
-    
-route($method,$urlList,$requestData);
-
-pg_close($Link);
-
-
-
-
-
-
-
-
-
-
-date_default_timezone_set('Asia/Tomsk');
-// include_once 'heplDish/dish_helper.php';
-
-
 function route($method, $urlList, $requestData)
 {
+    include_once 'helperFunctions/headers.php';
+    date_default_timezone_set('Asia/Tomsk');
     global $Link;
     $page = $_GET["page"] ?? 1;
     $size = $_GET["size"] ?? 10;
