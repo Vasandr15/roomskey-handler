@@ -1,6 +1,6 @@
 import { Button, Card, Col, Row } from 'antd';
 import {KeyOutlined, CarryOutOutlined, UserOutlined} from '@ant-design/icons'
-import styles from './styles.module.css';
+import styles from './mainPage.module.css';
 
 const mainPage = () => {
     return (
