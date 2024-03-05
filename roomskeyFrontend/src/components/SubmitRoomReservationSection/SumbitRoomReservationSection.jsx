@@ -1,9 +1,12 @@
 import ReservationCard from "../RequestCards/ReservationRequest/ReservationRequestCard.jsx";
+import classes from './SRRS.module.css'
 
-export default function SumbitReservationSection() {
+export default function SubmitReservationSection() {
     return (
         <section>
-            <ReservationCard></ReservationCard>
+            <div className="classes.">
+                <ReservationCard></ReservationCard>
+            </div>
         </section>
     )
 }
