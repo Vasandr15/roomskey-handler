@@ -1,29 +1,77 @@
 <?php
+
+include_once 'helperFunctions/headers.php';
+    
+function validatePage($page, $count)
+{
+    if ($page <= $count or ($page == 1 and $count == 0))
+    {
+        return true;
+    }
+    return false;
+}
+
+
 function route($method, $urlList, $requestData)
 {
-    include_once 'helperFunctions/headers.php';
-    date_default_timezone_set('Asia/Tomsk');
     global $Link;
     $page = $_GET["page"] ?? 1;
     $size = $_GET["size"] ?? 10;
     $date = $_GET["date"] ?? date("Y-m-d", time());
+    $room = $_GET["room"] ?? null;
+    $building = $_GET["building"] ?? null;
 
 
+    if (!is_numeric($page))
+    {
+        setHTTPStatus('400', 'Invalid value for attribute page');
+        return;
+    }
+
+    if (!is_numeric($size))
+    {
+        setHTTPStatus('400', 'Invalid value for attribute size');
+        return;
+    }
+
+    if (($timestamp = strtotime($date)) === false) {
+        setHTTPStatus('400', 'Invalid value for attribute date');
+        return;
+    }
 
     $keysQuery = "SELECT 
     k.id AS key_id,
     k.room AS room,
     k.building AS building,
-    sk.time AS time,
+    COALESCE(sk.time, null) AS time,
     u.name AS name,
     u.role AS role,
-    u.id AS user
+    u.id AS user,
+    ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+            'name', u.name,
+            'role', u.role,
+            'userID', u.id,
+            'time', sk.time
+        ) ORDER BY sk.time
+    ) AS bookedTime
     FROM 
         \"key\" k
-    JOIN 
-        \"statusKey\" sk ON k.id = sk.\"idKey\"
-    JOIN 
-        \"user\" u ON sk.\"idUser\" = u.\"id\"";
+    LEFT JOIN 
+        (SELECT * FROM \"statusKey\" WHERE \"date\" = '$date') sk ON k.id = sk.\"idKey\"
+    LEFT JOIN 
+        \"user\" u ON sk.\"idUser\" = u.\"id\"
+    WHERE 
+        1 = 1
+        " . ($room != NULL ? "AND k.room = '$room'" : "") . 
+        ($building != NULL ? "AND k.building = '$building'" : "") .
+    "GROUP BY
+    k.id, k.room, k.building, sk.time, u.name, u.role, u.id";
+
+
+
+
+
 
     $keysResult = pg_query($Link, $keysQuery);
 
@@ -31,10 +79,11 @@ function route($method, $urlList, $requestData)
     if ($keysResult) {
     // Массив для хранения ключей и их связанных данных
     $keys = array();
-
+    // Обработка результатов запроса
     // Обработка результатов запроса
     while ($keyRow = pg_fetch_assoc($keysResult)) {
-        $keyId = trim($keyRow['key_id']); // Используйте trim() здесь
+        $keyId = trim($keyRow['key_id']);
+
     
         // Если ключа еще нет в массиве, добавляем его
         if (!isset($keys[$keyId])) {
@@ -46,29 +95,45 @@ function route($method, $urlList, $requestData)
             );
         }
     
-        // Добавляем данные о забронированном времени для текущего ключа
-        $keys[$keyId]['bookedTime'][] = array(
-            'name' => trim($keyRow['name']), // Используйте trim() здесь
-            'role' => trim($keyRow['role']), // Используйте trim() здесь
-            'userID' => trim($keyRow['user']),
-            'time' => trim($keyRow['time'])
-        );
+        // Проверяем, есть ли данные о забронированном времени
+        if (isset($keyRow['time'])) {
+            // Добавляем данные о забронированном времени для текущего ключа
+            $keys[$keyId]['bookedTime'][] = array(
+                'name' => trim($keyRow['name']),
+                'role' => trim($keyRow['role']),
+                'userID' => trim($keyRow['user']),
+                'time' => trim($keyRow['time'])
+            );
+        }
     }
 
-    // Формируем структуру данных для вывода
+    $paginatedKeys = array_chunk($keys, $size, true);
+
+    // Получаем данные только для текущей страницы
+    $currentKeys = $paginatedKeys[$page - 1];
+
+    $count = count($keys);
+    $pageCount = ceil($count / $size);
+
+    if (!validatePage($page, $count))
+    {
+        setHTTPStatus('400', 'Invalid value for attribute page');
+        return;
+    }
+
     $output = array(
-    'keys' => array_values($keys), // Преобразуем ключи в индексированный массив
-    'pagination' => array(
-    'size' => 0, // Размер пагинации, если это требуется
-    'count' => count($keys), // Количество записей
-    'current' => 0 // Текущая страница пагинации, если это требуется
-    )
+        'keys' => $currentKeys,
+        'pagination' => array(
+            'size' => $size,
+            'count' => $pageCount,
+            'current' => $page
+        )
     );
 
-    // Преобразуем массив в JSON и выводим его
+
+    
     echo json_encode($output);
     } else {
-    // Если произошла ошибка при выполнении запроса
     echo "Ошибка при выполнении запроса: " . pg_last_error($Link);
     }
 

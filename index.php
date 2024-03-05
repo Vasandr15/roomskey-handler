@@ -2,6 +2,8 @@
     // include_once 'helpers/validation.php';
     include_once 'roomskeyBackend/helperFunctions/headers.php';
     // include_once 'helpers/searchAdres.php';
+
+    date_default_timezone_set('Asia/Tomsk');
     
     global $Link;
 
@@ -23,6 +25,7 @@
             }
             return $data;
     }
+
     function getMethod()
     {
         return $_SERVER['REQUEST_METHOD'];
