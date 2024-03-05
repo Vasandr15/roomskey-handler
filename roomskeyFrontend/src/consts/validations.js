@@ -1,7 +1,6 @@
 const ONLY_LETTERS  = /^[a-zA-Zа-яА-Я]+\s*$/;
 const PHONE_REGEX = /^\+7\s*\(\d{3}\)\s*\d{3}(-\d{2}){2}\s*$/;
 const FILL_IN = 'Заполните поле'
-const FILL_IN_EMAIL = 'Введите свой E-mail'
 const ONLY_LETTERS_MESSAGE = 'Вводите только буквы'
 
 class Validation {
@@ -44,7 +43,6 @@ export const Validations = {
     ],
 
     emailValidation : () =>  [
-        Validation.requireRule(FILL_IN_EMAIL),
         Validation.typeValidation('email','Введите действующий E-mail')
     ],
 

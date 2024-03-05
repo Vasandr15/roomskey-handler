@@ -3,6 +3,7 @@ import {Form, Input, Button, Card, Flex, Typography} from 'antd';
 import {Link} from "react-router-dom";
 import styles from './login.module.css'
 import {Validations} from "../../consts/validations.js";
+import {routes} from "../../consts/routes.js";
 
 const {Title} = Typography;
 const LoginForm = () => {
@@ -45,7 +46,7 @@ const LoginForm = () => {
                     </Flex>
                 </Form>
                 <div style={{textAlign: 'center'}}>
-                    Еще нет аккаунта? <a>Зарегестрироваться</a> {/*add link*/}
+                    Еще нет аккаунта? <Link to={routes.registration()}>Зарегестрироваться</Link>
                 </div>
             </Card>
         </div>);

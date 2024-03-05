@@ -1,5 +1,5 @@
 import { Row, Card, Col, Tabs, Button  } from 'antd';
-import styles from './styles.module.css'
+import styles from './allUsers.module.css'
 import UsersList from "../../components/userList/usersList.jsx";
 const AllUsersPage = () => {
     return(
