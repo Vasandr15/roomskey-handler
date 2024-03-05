@@ -1,19 +1,20 @@
-import classes from "./Header.module.css"
-export default function Header() {
+import {Breadcrumb, Layout, Menu, theme} from 'antd';
 
-    return (
-    <>
-        <nav>
-            <div>
-                <ul className={classes.navbarList}>
-                    <li><a href="">Главная</a></li>
-                    <li><a href="">Преподаватели</a></li>
-                    <li><a className="active" href=" ">Заявки</a></li>
-                    <li><a href="">Ключи</a></li>
-                </ul>
-            </div>
-            <span><a href="">Имя Фамилия</a></span>
-        </nav>
-    </>
-    )
+const {Header, Content, Footer} = Layout
+export default function HeaderSection() {
+
+    const items = [{key: 1, label: "Пользователи"}, {key: 2, label: "Заявки"}, {key: 3, label: "Ключи"}, {
+        key: 4, label: "Профиль"
+    }]
+
+    return (<Header style={{display: 'flex', alignItems: 'center'}}>
+            <div className="demo-logo"/>
+            <Menu
+                theme="dark"
+                mode="horizontal"
+                defaultSelectedKeys={['2']}
+                items={items}
+                style={{flex: 1, minWidth: 0}}
+            />
+        </Header>)
 }
