@@ -1,6 +1,6 @@
 <?php
     // include_once 'helpers/validation.php';
-    include_once 'roomskeyBackend/helperFunctions/headers.php';
+    include_once 'endpoints/helperFunctions/headers.php';
     // include_once 'helpers/searchAdres.php';
     
     global $Link;
@@ -60,9 +60,9 @@
     $method = getMethod();
 
 
-    if (file_exists(realpath(dirname(__FILE__)).'/roomskeyBackend/' . $router . '.php'))
+    if (file_exists(realpath(dirname(__FILE__)).'/endpoints/' . $router . '.php'))
     {       
-        include_once 'roomskeyBackend/' . $router . '.php';
+        include_once 'endpoints/' . $router . '.php';
         route($method, $urlList, $requestData);
     }
     else
