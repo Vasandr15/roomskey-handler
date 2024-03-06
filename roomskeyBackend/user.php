@@ -4,22 +4,25 @@ function route($method, $urlList, $requestData)
     if($method == "POST") {   
         switch ($urlList[1]) {
             case 'login':
-                echo "ento login!!!";
+                // echo "ento login!!!";
                 global $Link;
-                $login = $requestData->body->login;
-                $password = hash("sha1", $requestData->body->password);
+                $email = $requestData->body->email;
+                // $password = hash("sha1", $requestData->body->password);
+                $password = $requestData->body->password;
+                // echo $email;
 
-                $user = pg_fetch_assoc(pg_query($Link, "SELECT id from users Where login='$login' AND password='$password'"));
+                $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users Where email='$email' AND password='$password'"));
+                echo $user['id'];
                 if (!is_null($user)) {
                     $token = bin2hex(random_bytes(16));
                     $userID = $user['id'];
-                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(value, userID) VALUES ('$token', '$userID')");
-                    if (!$tokenInsertResult) {
-                        //400р
-                        echo json_encode($Link->error);
-                    } else {
-                        echo json_encode(['token' => $token]);
-                    }
+                    // $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(value, userID) VALUES ('$token', '$userID')");
+                    // if (!$tokenInsertResult) {
+                    //     //400р
+                    //     echo json_encode($Link->error);
+                    // } else {
+                    //     echo json_encode(['token' => $token]);
+                    // }
                 } else {
                     setHTTPStatus("400", "input data incorrect");
                 }
