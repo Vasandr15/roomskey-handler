@@ -1,36 +1,29 @@
 <?php
-function validatePassword($pass)
-{
-    if (validateStringNotLess($pass,6))
-    {
-        return true;
+    function validatePassword($password) {
+        if (strlen($password) >= 6) {
+            return true;
+        }
+        return false;
     }
-    return false;
-}
 
-function validateEmail($email)
-{
-    if (filter_var($email, FILTER_VALIDATE_EMAIL))
-    {
-        return true;
+    function validateEmail($email) {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return true;
+        }
+        return false;
     }
-    return false;
-}
 
-function validateFullName($fullName)
-{
-    if (validateStringNotLess($fullName,1))
-    {
-        return true;
+    function validateName($name) {
+        if (strlen($name) >= 1) {
+            return true;
+        }
+        return false;
     }
-    return false;
-}
 
-function validatePhoneNumber($phoneNumber)
-{
-    if (ctype_digit($phoneNumber))
-    {
-        return true;
+    function validatePhone($phone) {
+        if (ctype_digit($phone)) {
+            return true;
+        }
+        return false;
     }
-    return false;
-}
+?>

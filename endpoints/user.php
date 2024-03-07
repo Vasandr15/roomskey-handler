@@ -1,27 +1,23 @@
 <?php
-function route($method, $urlList, $requestData)
-{
+function route($method, $urlList, $requestData) {
+    include_once 'endpoints/helperFunctions/helpUser.php';
+    global $Link;
     if($method == "POST") {   
         switch ($urlList[1]) {
             case 'login':
                 // echo "ento login!!!";
-                global $Link;
                 $phone = $requestData->body->phone;
-                // $password = hash("sha1", $requestData->body->password);
-                $password = $requestData->body->password;
-                // echo $phone;
-                // echo $password;
+                $password = hash("sha1", $requestData->body->password);
 
                 $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users Where phone='$phone' AND password='$password'"));
                 if (!is_null($user)) {
-                    // $token = bin2hex(random_bytes(16));
                     $userID = $user['id'];
-                    // echo $userID;
                     $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(iduser) VALUES ('$userID')");
+
                     $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE iduser='$userID' ORDER BY createtime DESC LIMIT 1"));
                     if (!$tokenInsertResult) {
-                        //400р
-                        echo json_encode($Link->error);
+                        //400р не работает))
+                        echo json_encode(pg_last_error());
                     } else {
                         echo json_encode($token['token']);
                     }
@@ -31,54 +27,64 @@ function route($method, $urlList, $requestData)
             break;
 
             case 'register':
-                echo "ento register!!!";
-                $password = $requestData->body->password;
-                $login = $requestData->body->login;
+                // echo "ento register!!!";
                 $name = $requestData->body->name;
-
-                // $user = $Link->query("SELECT id FROM users where login='$login'")->fetch_assoc();
-                $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users where login='$login'"));
+                $password = $requestData->body->password;
+                $phone = $requestData->body->phone;
+                $role = $requestData->body->role;
+                $email = $requestData->body->email;
                 
+                if (!validateName($name)) {
+                    setHTTPStatus("400", "Name is less then 1");
+                    return;
+                }
 
                 if (!validatePassword($password)) {
                     setHTTPStatus("400", "Password  is less then 6");
                     return;
                 }
 
-                if (!validateEmail($login)) {
-                    setHTTPStatus("400", "The Email field is not a valid e-mail address");
+                if (!validatePhone($phone)) {
+                    setHTTPStatus("400", "Phone is contains invalid characters");
                     return;
                 }
 
-                if (!validateName($name)) {
-                    setHTTPStatus("400", "name is less then 1");
-                    return;
+                // Сделать валидацию почты на фронте
+                if ($email) {
+                    if (!validateEmail($email)) {
+                        setHTTPStatus("400", "The Email field is not a valid e-mail address");
+                        return;
+                    }
                 }
 
-                $password = hash("sha1", $requestData->body->password);
+                $password = hash("sha1", $password);
+                
+                if (!$email) {
+                    $userInsertResult = pg_query($Link, "INSERT INTO users(name, password, phone, role) VALUES ('$name', '$password', '$phone', '$role')");
+                } else {
+                    $userInsertResult = pg_query($Link, "INSERT INTO users(name, email, password, phone, role) VALUES ('$name', '$email', '$password', '$phone', '$role')");
+                }
+                
+                $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users Where phone='$phone'"));
+                $userID = $user['id'];
 
-                // $userInsertResult = $Link->query("INSERT INTO users(fullName,login, password) 
-                // VALUES('$fullName','$login','$password')");
-
-                $userInsertResult = pg_query($Link, "INSERT INTO users(name, login, password) 
-                VALUES('$name','$login','$password')");
                 if (!$userInsertResult) {
-                    //400
-                    if ($Link->errno == 1062) {
-                        setHTTPStatus("400", "user '$login' is taken");
+                    //400 не работает
+                    if (pg_last_error() == 1062) { 
+                        setHTTPStatus("400", "user '$name' is taken");
                     }               
                 } else {
-                    setHTTPStatus("201", "Login '$login' is succesfully created");
                     
-                    $token = bin2hex(random_bytes(16));
-                    // $tokenInsertResult = $Link->query("INSERT INTO tokens(value, userID) VALUES ('$token', '$Link->insert_id')");
 
-                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(value, userID) VALUES ('$token', '$Link->insert_id')");
+                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(iduser) VALUES ('$userID')");
+                    
+                    $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE iduser='$userID' ORDER BY createtime DESC LIMIT 1"));
+
                     if (!$tokenInsertResult) {
-                        //400
-                        echo json_encode($Link->error);
+                        //400 не работает
+                        echo json_encode(pg_last_error());
                     } else {
-                        echo json_encode(['token' => $token]);
+                        setHTTPStatus("201", "Login '$name' is succesfully created. Token = " . $token['token']);
                     }
                 }
         }
