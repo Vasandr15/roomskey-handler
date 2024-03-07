@@ -280,6 +280,7 @@ function route($method, $urlList, $requestData) {
     else if ($method == "PATCH") {
         switch ($urlList[1]) {
             case '':
+                // echo "ento PATCH";
                 $token = substr(getallheaders()["Authorization"], 7);
                 
                 $userId = $_GET["id"];
@@ -304,7 +305,17 @@ function route($method, $urlList, $requestData) {
     else if ($method == "DELETE") {
         switch ($urlList[1]) {
             case 'logout':
-                echo "ento DELETE logout";
+                // echo "ento DELETE logout";
+
+                $token = substr(getallheaders()["Authorization"], 7);
+                $findToken = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens Where token='$token'"))['token'];
+
+                if (!$findToken) {
+                    setHTTPStatus("401", "Unauthorized");
+                } else {
+                    $logoutUserResult = pg_query($Link, "DELETE FROM tokens Where token='$token'");
+                    setHTTPStatus("200", "User logged out successfully");
+                }
             break;
         }
     } else {
