@@ -6,23 +6,25 @@ function route($method, $urlList, $requestData)
             case 'login':
                 // echo "ento login!!!";
                 global $Link;
-                $email = $requestData->body->email;
+                $phone = $requestData->body->phone;
                 // $password = hash("sha1", $requestData->body->password);
                 $password = $requestData->body->password;
-                // echo $email;
+                // echo $phone;
+                // echo $password;
 
-                $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users Where email='$email' AND password='$password'"));
-                echo $user['id'];
+                $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users Where phone='$phone' AND password='$password'"));
                 if (!is_null($user)) {
-                    $token = bin2hex(random_bytes(16));
+                    // $token = bin2hex(random_bytes(16));
                     $userID = $user['id'];
-                    // $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(value, userID) VALUES ('$token', '$userID')");
-                    // if (!$tokenInsertResult) {
-                    //     //400р
-                    //     echo json_encode($Link->error);
-                    // } else {
-                    //     echo json_encode(['token' => $token]);
-                    // }
+                    // echo $userID;
+                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(iduser) VALUES ('$userID')");
+                    $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE iduser='$userID' ORDER BY createtime DESC LIMIT 1"));
+                    if (!$tokenInsertResult) {
+                        //400р
+                        echo json_encode($Link->error);
+                    } else {
+                        echo json_encode($token['token']);
+                    }
                 } else {
                     setHTTPStatus("400", "input data incorrect");
                 }

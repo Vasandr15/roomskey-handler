@@ -30,12 +30,7 @@
 
     header('Content-type: application/json');
 
-    // $host = 'localhost';
-    // $dbname = 'postgres';
-    // $username = 'postgres';
-    // $password = '';
-
-    $host = '79.133.183.21:5432';
+    $host = '79.133.183.21';
     $dbname = 'keysHandler';
     $username = 'postgres';
     $password = 'bezdar123';
