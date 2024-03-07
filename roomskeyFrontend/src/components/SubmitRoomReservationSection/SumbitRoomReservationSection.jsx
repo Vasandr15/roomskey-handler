@@ -3,10 +3,10 @@ import classes from './SRRS.module.css'
 
 export default function SubmitReservationSection() {
     return (
-        <section>
-            <div className="classes.">
+        <>
+            <div className={classes.requests_sect}>
                 <ReservationCard></ReservationCard>
             </div>
-        </section>
+        </>
     )
 }
