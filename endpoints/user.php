@@ -286,9 +286,9 @@ function route($method, $urlList, $requestData) {
                 $userId = $_GET["id"];
                 $role = $requestData->body->role;
 
-                $roleUpdateResult = pg_query($Link, "UPDATE users SET role = '$role' Where id='$userId'");
+                $roleUpdateRoleResult = pg_query($Link, "UPDATE users SET role = '$role' Where id='$userId'");
                 
-                if (!$roleUpdateResult) {
+                if (!$roleUpdateRoleResult) {
                     setHTTPStatus("400", "input data incorrect");
                 } else {
                     setHTTPStatus("200", "The role has been updated");
@@ -299,7 +299,24 @@ function route($method, $urlList, $requestData) {
     }
     else if ($method == "PUT") {
         if ($urlList[1] == "profile" && $urlList[2] == "update") {
-            echo "ento PUT profile update";
+            // echo "ento PUT profile update";
+
+            $name = $requestData->body->name;
+            $email = $requestData->body->email;
+            $phone = $requestData->body->phone;
+            $avatarLink = $requestData->body->avatarLink;
+           
+            $token = substr(getallheaders()["Authorization"], 7);
+
+            $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
+
+            $userUpdateInfoResult = pg_query($Link, "UPDATE users SET name = '$name', email = '$email', phone = '$phone', avatarlink = '$avatarLink' Where id='$userId'");
+
+            if (!$userUpdateInfoResult) {
+                setHTTPStatus("400", "Input data incorrect");
+            } else {
+                setHTTPStatus("200", "User updated successfully");
+            }
         }
     }
     else if ($method == "DELETE") {
