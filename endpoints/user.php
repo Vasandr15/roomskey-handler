@@ -12,9 +12,9 @@ function route($method, $urlList, $requestData) {
                 $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users Where phone='$phone' AND password='$password'"));
                 if (!is_null($user)) {
                     $userID = $user['id'];
-                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(iduser) VALUES ('$userID')");
+                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(userid) VALUES ('$userID')");
 
-                    $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE iduser='$userID' ORDER BY createtime DESC LIMIT 1"));
+                    $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE userid='$userID' ORDER BY createtime DESC LIMIT 1"));
                     if (!$tokenInsertResult) {
                         //400р не работает))
                         echo json_encode(pg_last_error());
@@ -76,9 +76,9 @@ function route($method, $urlList, $requestData) {
                 } else {
                     
 
-                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(iduser) VALUES ('$userID')");
+                    $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(userid) VALUES ('$userID')");
                     
-                    $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE iduser='$userID' ORDER BY createtime DESC LIMIT 1"));
+                    $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE userid='$userID' ORDER BY createtime DESC LIMIT 1"));
 
                     if (!$tokenInsertResult) {
                         //400 не работает
@@ -93,7 +93,13 @@ function route($method, $urlList, $requestData) {
     else if ($method == "GET") {
         switch ($urlList[1]) {
             case 'profile':
-                echo "ento GET profile";
+                // echo "ento GET profile";
+                $token = substr(getallheaders()["Authorization"], 7);
+                
+                $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
+                $user = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));
+                
+                echo json_encode($user);
                 break;
             case '':
                 echo "ento GET users list";
