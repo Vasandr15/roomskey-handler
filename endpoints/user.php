@@ -22,7 +22,7 @@ function route($method, $urlList, $requestData) {
                         echo json_encode($token['token']);
                     }
                 } else {
-                    setHTTPStatus("400", "input data incorrect");
+                    setHTTPStatus("400", "Input data incorrect");
                 }
             break;
 
@@ -87,6 +87,7 @@ function route($method, $urlList, $requestData) {
                         setHTTPStatus("201", "Login '$name' is succesfully created. Token = " . $token['token']);
                     }
                 }
+            break;
         }
         
     }
@@ -100,7 +101,7 @@ function route($method, $urlList, $requestData) {
                 $user = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));
                 
                 echo json_encode($user);
-                break;
+            break;
             case '':
                 // echo "ento GET users list";
                 $name = $_GET["name"];
@@ -273,31 +274,38 @@ function route($method, $urlList, $requestData) {
                     
                 }
 
-                break;
+            break;
         }
     }
     else if ($method == "PATCH") {
         switch ($urlList[1]) {
             case '':
-                echo "ento PATCH";
-                break;
+                $token = substr(getallheaders()["Authorization"], 7);
+                
+                $userId = $_GET["id"];
+                $role = $requestData->body->role;
+
+                $roleUpdateResult = pg_query($Link, "UPDATE users SET role = '$role' Where id='$userId'");
+                
+                if (!$roleUpdateResult) {
+                    setHTTPStatus("400", "input data incorrect");
+                } else {
+                    setHTTPStatus("200", "The role has been updated");
+                }
+
+            break;
         }
     }
     else if ($method == "PUT") {
         if ($urlList[1] == "profile" && $urlList[2] == "update") {
             echo "ento PUT profile update";
         }
-        // switch ($urlList[1]) {
-        //     case 'profile':
-        //         echo "ento PUT profile update";
-        //         break;
-        // }
     }
     else if ($method == "DELETE") {
         switch ($urlList[1]) {
             case 'logout':
                 echo "ento DELETE logout";
-                break;
+            break;
         }
     } else {
         setHTTPStatus("400", "You can only use POST to $urlList[1]");
