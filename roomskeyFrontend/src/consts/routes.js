@@ -4,4 +4,5 @@ export const routes = {
     registration: () => '/registration',
     profile: () => '/profile',
     users: () => '/users'
+    requests: () => '/requests'
 }
