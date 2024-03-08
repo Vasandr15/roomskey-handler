@@ -106,17 +106,31 @@ function route($method, $urlList, $requestData) {
                 // echo "ento GET users list";
                 $name = $_GET["name"];
                 $roles = $_GET["roles"];
-                $page = $_GET["page"];
-                $size = $_GET["size"];
+                $page = $_GET["page"] ?? 1;
+                $size = $_GET["size"] ?? 10;
                 $sort = $_GET["sort"];
 
                 $token = substr(getallheaders()["Authorization"], 7);
-                if ((is_null($name) AND is_null($roles) AND is_null($page) AND is_null($size) AND is_null($sort))) {
-                    echo "114";
-                    $page = 1;
-                    $size = 10;
+                
+                if ($sort !== "") {
+                    if ($sort[6] === "D") {
+                        $sort = "DESC";
+                    } else {
+                        $sort = "ASC";
+                    }
+                }
 
-                    $usersInDb = pg_query($Link, "SELECT id FROM users ORDER BY id");
+                if ($name === "") {
+                    $name = null;
+                }
+
+                if ($roles === "") {
+                    $roles = null;
+                }
+
+                if (!is_null($name) AND !is_null($roles)) {
+                    // echo "132";
+                    $usersInDb = pg_query($Link, "SELECT id FROM users WHERE name LIKE '%$name%' and role='$roles' ORDER BY id $sort");
                     $users = [];
                     while ($row = pg_fetch_assoc($usersInDb)) {
                         $userId = $row['id'];
@@ -132,146 +146,90 @@ function route($method, $urlList, $requestData) {
 
                     if ($page < 0 OR $page > ceil(count($users)/$size)) {
                         setHTTPStatus("400", "Incorrect page");
-                    }
-                    else {
+                    } else {
                         $responseBody = [
-                            // "users" => array_slice($users, ($page-1)*$size, $size),
-                            "users" => $users,
+                            "users" => array_slice($users, ($page-1)*$size, $size),
                             "pagination" => $pagination
                         ];
                         echo json_encode($responseBody);
                     }
-
-                } else {
-                    
-                    if ($size === "" OR is_null($size)) {
-                        $size = 10;
+                }
+                else if (is_null($name) AND !is_null($roles)) {
+                    // echo "158";
+                    $usersInDb = pg_query($Link, "SELECT id FROM users WHERE role='$roles' ORDER BY id $sort");
+                    $users = [];
+                    while ($row = pg_fetch_assoc($usersInDb)) {
+                        $userId = $row['id'];
+                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
+                        array_push($users, $userInDb);
                     }
 
-                    if ($page === "" OR is_null($page)) {
-                        $page = 1;
-                    }
+                    $pagination = [
+                        "size" => $size,
+                        "count" => ceil(count($users)/$size),
+                        "current" => $page
+                    ];
 
-                    if ($sort !== "") {
-                        if ($sort[6] === "D") {
-                            $sort = "DESC";
-                        } else {
-                            $sort = "ASC";
-                        }
-                    }
-
-                    if ($name === "") {
-                        $name = null;
-                    }
-
-                    if ($roles === "") {
-                        $roles = null;
-                    }
-
-                    if (!is_null($name) AND !is_null($roles)) {
-                        echo "167";
-                        $usersInDb = pg_query($Link, "SELECT id FROM users WHERE name LIKE '%$name%' and role='$roles' ORDER BY id $sort");
-                        $users = [];
-                        while ($row = pg_fetch_assoc($usersInDb)) {
-                            $userId = $row['id'];
-                            $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
-                            array_push($users, $userInDb);
-                        }
-
-                        $pagination = [
-                            "size" => $size,
-                            "count" => ceil(count($users)/$size),
-                            "current" => $page
-                        ];
-
-                        if ($page < 0 OR $page > ceil(count($users)/$size)) {
-                            setHTTPStatus("400", "Incorrect page");
-                        } else {
-                            $responseBody = [
-                                "users" => array_slice($users, ($page-1)*$size, $size),
-                                "pagination" => $pagination
-                            ];
-                            echo json_encode($responseBody);
-                        }
-                    }
-                    else if (is_null($name) AND !is_null($roles)) {
-                        echo "193";
-                        $usersInDb = pg_query($Link, "SELECT id FROM users WHERE role='$roles' ORDER BY id $sort");
-                        $users = [];
-                        while ($row = pg_fetch_assoc($usersInDb)) {
-                            $userId = $row['id'];
-                            $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
-                            array_push($users, $userInDb);
-                        }
-
-                        $pagination = [
-                            "size" => $size,
-                            "count" => ceil(count($users)/$size),
-                            "current" => $page
-                        ];
-
-                        if ($page < 0 OR $page > ceil(count($users)/$size)) {
-                            setHTTPStatus("400", "Incorrect page");
-                        } else {
-                            $responseBody = [
-                                "users" => array_slice($users, ($page-1)*$size, $size),
-                                "pagination" => $pagination
-                            ];
-                            echo json_encode($responseBody);
-                        }
-                    }
-                    else if (!is_null($name) AND is_null($roles)) {
-                        echo "219";
-                        $usersInDb = pg_query($Link, "SELECT id FROM users WHERE name LIKE '%$name%' ORDER BY id $sort");
-                        $users = [];
-                        while ($row = pg_fetch_assoc($usersInDb)) {
-                            $userId = $row['id'];
-                            $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
-                            array_push($users, $userInDb);
-                        }
-
-                        $pagination = [
-                            "size" => $size,
-                            "count" => ceil(count($users)/$size),
-                            "current" => $page
-                        ];
-
-                        if ($page < 0 OR $page > ceil(count($users)/$size)) {
-                            setHTTPStatus("400", "Incorrect page");
-                        } else {
-                            $responseBody = [
-                                "users" => array_slice($users, ($page-1)*$size, $size),
-                                "pagination" => $pagination
-                            ];
-                            echo json_encode($responseBody);
-                        }
+                    if ($page < 0 OR $page > ceil(count($users)/$size)) {
+                        setHTTPStatus("400", "Incorrect page");
                     } else {
-                        echo "244";
-                        $usersInDb = pg_query($Link, "SELECT id FROM users ORDER BY id $sort");
-                        $users = [];
-                        while ($row = pg_fetch_assoc($usersInDb)) {
-                            $userId = $row['id'];
-                            $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
-                            array_push($users, $userInDb);
-                        }
-
-                        $pagination = [
-                            "size" => $size,
-                            "count" => ceil(count($users)/$size),
-                            "current" => $page
+                        $responseBody = [
+                            "users" => array_slice($users, ($page-1)*$size, $size),
+                            "pagination" => $pagination
                         ];
-
-                        if ($page < 0 OR $page > ceil(count($users)/$size)) {
-                            setHTTPStatus("400", "Incorrect page");
-                        } else {
-                            $responseBody = [
-                                "users" => array_slice($users, ($page-1)*$size, $size),
-                                "pagination" => $pagination
-                            ];
-                            echo json_encode($responseBody);
-                        }
+                        echo json_encode($responseBody);
                     }
-                    
+                }
+                else if (!is_null($name) AND is_null($roles)) {
+                    // echo "184";
+                    $usersInDb = pg_query($Link, "SELECT id FROM users WHERE name LIKE '%$name%' ORDER BY id $sort");
+                    $users = [];
+                    while ($row = pg_fetch_assoc($usersInDb)) {
+                        $userId = $row['id'];
+                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
+                        array_push($users, $userInDb);
+                    }
+
+                    $pagination = [
+                        "size" => $size,
+                        "count" => ceil(count($users)/$size),
+                        "current" => $page
+                    ];
+
+                    if ($page < 0 OR $page > ceil(count($users)/$size)) {
+                        setHTTPStatus("400", "Incorrect page");
+                    } else {
+                        $responseBody = [
+                            "users" => array_slice($users, ($page-1)*$size, $size),
+                            "pagination" => $pagination
+                        ];
+                        echo json_encode($responseBody);
+                    }
+                } else {
+                    // echo "209";
+                    $usersInDb = pg_query($Link, "SELECT id FROM users ORDER BY id $sort");
+                    $users = [];
+                    while ($row = pg_fetch_assoc($usersInDb)) {
+                        $userId = $row['id'];
+                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
+                        array_push($users, $userInDb);
+                    }
+
+                    $pagination = [
+                        "size" => $size,
+                        "count" => ceil(count($users)/$size),
+                        "current" => $page
+                    ];
+
+                    if ($page < 0 OR $page > ceil(count($users)/$size)) {
+                        setHTTPStatus("400", "Incorrect page");
+                    } else {
+                        $responseBody = [
+                            "users" => array_slice($users, ($page-1)*$size, $size),
+                            "pagination" => $pagination
+                        ];
+                        echo json_encode($responseBody);
+                    }
                 }
 
             break;
