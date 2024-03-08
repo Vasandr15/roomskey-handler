@@ -45,7 +45,7 @@ const ProfilePage = () => {
     };
     return (
         <Row justify="center">
-            <Col md={11}>
+            <Col md={13}>
                 <Card className={styles.card} md={11}>
                     <Row align="middle">
                         <Col flex="100px">

@@ -10,7 +10,7 @@ const mainPage = () => {
         navigate()
     }
     const handleRequestsClick=()=>{
-        navigate()
+        navigate(routes.requests())
     }
     const handleUsersClick=()=>{
         navigate(routes.users())

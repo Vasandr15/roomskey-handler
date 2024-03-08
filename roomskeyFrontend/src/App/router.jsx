@@ -7,30 +7,42 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage.jsx";
 import AllUsersPage from "../pages/AllUsersPage/allUsersPage.jsx";
 import NotFoundPage from "../pages/NotFoundPage.jsx";
 import React from "react";
+import RequestsPage from "../pages/RequestsPage/RequestsPage.jsx";
+import LayoutWithHeader from "./LayoutWithHeader.jsx";
 
 export const router = createBrowserRouter([
     {
-        path: routes.root(),
-        element:<MainPage/>
-    },
-    {
-        path: routes.login(),
-        element: <Login/>
-    },
-    {
-        path: routes.registration(),
-        element: <RegistrationForm/>
-    },
-    {
-        path: routes.profile(),
-        element: <ProfilePage/>
-    },
-    {
-        path: routes.users(),
-        element: <AllUsersPage/>
-    },
-    {
-        path: '*',
-        element: <NotFoundPage/>
+        path: '/',
+        element: <LayoutWithHeader/>,
+        children:[
+            {
+                path: routes.root(),
+                element:<MainPage/>
+            },
+            {
+                path: routes.login(),
+                element: <Login/>
+            },
+            {
+                path: routes.registration(),
+                element: <RegistrationForm/>
+            },
+            {
+                path: routes.profile(),
+                element: <ProfilePage/>
+            },
+            {
+                path: routes.users(),
+                element: <AllUsersPage/>
+            },
+            {
+                path: routes.requests(),
+                element: <RequestsPage/>
+            },
+            {
+                path: '*',
+                element: <NotFoundPage/>
+            }
+        ]
     }
 ])

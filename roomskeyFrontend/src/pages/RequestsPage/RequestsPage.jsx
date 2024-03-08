@@ -6,11 +6,6 @@ const { Header, Content, Footer } = Layout
 export default function RequestsPage() {
 
     return (
-        <Layout>
-            <HeaderSection/>
-            <Content>
-                <SubmitReservationSection/>
-            </Content>
-        </Layout>
+        <SubmitReservationSection/>
     )
 }

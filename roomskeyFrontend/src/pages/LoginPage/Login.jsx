@@ -4,6 +4,7 @@ import {Link} from "react-router-dom";
 import styles from './login.module.css'
 import {Validations} from "../../consts/validations.js";
 import {routes} from "../../consts/routes.js";
+import {MaskedInput} from "antd-mask-input";
 
 const {Title} = Typography;
 const LoginForm = () => {
@@ -31,8 +32,9 @@ const LoginForm = () => {
             <Card className={styles.antCard}>
                 <Form form={form} name="login" onFinish={onFinish} layout="vertical" initialValues={{remember: true,}}>
                     <Title>Вход</Title>
-                    <Form.Item name="email" label="Email" rules={Validations.emailValidation()}>
-                        <Input/>
+                    <Form.Item
+                        name="phone" label="Номер телефона" rules={Validations.phoneValidation()}>
+                        <MaskedInput mask={"+7 (000) 000-00-00"}/>
                     </Form.Item>
                     <Form.Item name="password" label="Пароль" hasFeedback rules={Validations.passwordValidation()}>
                         <Input.Password/>
