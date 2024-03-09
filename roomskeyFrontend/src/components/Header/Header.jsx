@@ -13,10 +13,11 @@ export default function HeaderSection() {
         users: routes.users(),
         requests: routes.requests(),
         profile: routes.profile(),
-        login: routes.login()
+        login: routes.login(),
+        keys: routes.keys()
     };
 
-    // Reverse mapping from path back to key
+
     const pathToKey = Object.keys(menuRoutes).reduce((acc, key) => {
         const path = menuRoutes[key];
         acc[path] = key;

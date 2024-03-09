@@ -7,7 +7,7 @@ import {useNavigate} from "react-router";
 const mainPage = () => {
     const navigate = useNavigate();
     const handleKeysClick=()=>{
-        navigate()
+        navigate(routes.keys())
     }
     const handleRequestsClick=()=>{
         navigate(routes.requests())
