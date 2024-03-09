@@ -1,9 +1,9 @@
 import {DatePicker, Flex, Select, Space, Switch} from "antd";
 
-export default function KeyFilters() {
+export default function KeyFilters({ inStock, onToggleSwitch }) {
 
     return (
-        <Flex horizonal gap="large" align="center">
+        <Flex  gap="large" align="center">
             <DatePicker
                 style={{ width: '100%' }}
                 placeholder="Дата"
@@ -20,11 +20,11 @@ export default function KeyFilters() {
                 allowClear
                 style={{ width: '100%' }}
                 placeholder="Корпус"
-                defaultValue={["102", "103", "104", "102", "103", "104", "102", "103", "104"]}
+                defaultValue={["102", "103", "104", "202", "203", "204", "302", "303", "304"]}
             />
-            <Flex horizontal align="center">
+            <Flex  align="center">
                 <span style={{marginRight: '10px'}}>В наличии:</span>
-                <Switch defaultChecked={false} />
+                <Switch checked={inStock} onChange={onToggleSwitch} />
             </Flex>
         </Flex>
     )
