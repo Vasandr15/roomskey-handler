@@ -1,6 +1,6 @@
 <?php
     // include_once 'helpers/validation.php';
-    include_once 'roomskeyBackend/helperFunctions/headers.php';
+    include_once 'endpoints/helperFunctions/headers.php';
     // include_once 'helpers/searchAdres.php';
 
     date_default_timezone_set('Asia/Tomsk');
@@ -33,10 +33,15 @@
 
     header('Content-type: application/json');
 
-    $host = 'localhost';
-    $dbname = 'db';
+    $host = '79.133.183.21';
+    $dbname = 'keysHandler';
     $username = 'postgres';
-    $password = 'postgres';
+    $password = 'bezdar123';
+
+    // $host = 'localhost';
+    // $dbname = 'db';
+    // $username = 'postgres';
+    // $password = 'postgres';
 
     $conn_string = "host=$host dbname=$dbname user=$username password=$password";
 
