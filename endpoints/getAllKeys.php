@@ -21,6 +21,8 @@ function route($method, $urlList, $requestData)
     $room = $_GET["room"] ?? null;
     $building = $_GET["building"] ?? null;
 
+    echo $room;
+
 
     if (!is_numeric($page))
     {
@@ -120,7 +122,7 @@ if ($keysResult) {
     $count = count($keys);
     $pageCount = ceil($count / $size);
 
-    if (!validatePage($page, $count))
+    if (!validatePage($page, $pageCount))
     {
         setHTTPStatus('400', 'Invalid value for attribute page');
         return;
