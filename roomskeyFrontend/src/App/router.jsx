@@ -9,6 +9,7 @@ import NotFoundPage from "../pages/NotFoundPage.jsx";
 import React from "react";
 import RequestsPage from "../pages/RequestsPage/RequestsPage.jsx";
 import LayoutWithHeader from "./LayoutWithHeader.jsx";
+import KeysPage from "../pages/KeysPage/KeysPage.jsx";
 
 export const router = createBrowserRouter([
     {
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
             {
                 path: routes.requests(),
                 element: <RequestsPage/>
+            },
+            {
+                path: routes.keys(),
+                element: <KeysPage/>
             },
             {
                 path: '*',
