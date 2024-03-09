@@ -44,7 +44,6 @@ export const Validations = {
     ],
 
     emailValidation : () =>  [
-        Validation.requireRule(FILL_IN_EMAIL),
         Validation.typeValidation('email','Введите действующий E-mail')
     ],
 

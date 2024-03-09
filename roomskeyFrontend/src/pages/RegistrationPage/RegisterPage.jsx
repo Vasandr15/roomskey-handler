@@ -1,16 +1,19 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Link} from "react-router-dom";
 import {Form, Input, Button, Card, Flex, Typography} from 'antd';
-import InputMask from 'react-input-mask';
+import {MaskedInput} from 'antd-mask-input';
 import styles from './register.module.css'
 import {Validations} from "../../consts/validations.js";
+import {routes} from "../../consts/routes.js";
+import {cleanUpValues, removeSpaces} from "../../helpers/inputHelpers.js";
+import {registerUser} from "../../API/registerUser.js";
 
 const {Title} = Typography;
 
 const RegistrationForm = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-
+    const phoneInputRef = useRef(null);
     useEffect(() => {
         document.body.classList.add(styles.backgroundImage);
         return () => {
@@ -21,8 +24,9 @@ const RegistrationForm = () => {
 
     const onFinish = (values) => {
         setLoading(true);
-        console.log('Received values of form:', values);
-        // api request here
+        cleanUpValues(values);
+        console.log(values);
+        registerUser(values)
         setTimeout(() => {
             setLoading(false);
         }, 4000);
@@ -51,9 +55,7 @@ const RegistrationForm = () => {
                     </Form.Item>
                     <Form.Item
                         name="phone" label="Номер телефона" rules={Validations.phoneValidation()}>
-                        <InputMask mask="+7 (999) 999-99-99" maskChar=" " alwaysShowMask={true} onChange={e => console.log(e.target.value)} >
-                            {(inputProps) => <Input {...inputProps} />}
-                        </InputMask>
+                        <MaskedInput mask={"+7 (000) 000-00-00"}/>
                     </Form.Item>
                     <Form.Item name="password" label="Пароль" hasFeedback rules={Validations.passwordValidation()}>
                         <Input.Password/>
@@ -72,7 +74,7 @@ const RegistrationForm = () => {
                     </Flex>
                 </Form>
                 <div style={{textAlign: 'center'}}>
-                    Уже есть аккаунт? <a>Войти</a> {/*add link*/}
+                    Уже есть аккаунт?
                 </div>
             </Card>
         </div>
