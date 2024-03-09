@@ -4,7 +4,7 @@ include_once 'helperFunctions/headers.php';
     
 function validatePage($page, $count)
 {
-    if ($page <= $count or ($page == 1 and $count == 0))
+    if ($page <= $count || ($page == 1 && $count == 0))
     {
         return true;
     }
@@ -15,130 +15,84 @@ function validatePage($page, $count)
 function route($method, $urlList, $requestData)
 {
     global $Link;
-    $page = $_GET["page"] ?? 1;
-    $size = $_GET["size"] ?? 10;
-    $date = $_GET["date"] ?? date("Y-m-d", time());
-    $room = $_GET["room"] ?? null;
-    $building = $_GET["building"] ?? null;
-
-
-    if (!is_numeric($page))
+    switch($method)
     {
-        setHTTPStatus('400', 'Invalid value for attribute page');
-        return;
-    }
+        case 'POST':
 
-    if (!is_numeric($size))
-    {
-        setHTTPStatus('400', 'Invalid value for attribute size');
-        return;
-    }
+            $headers = getallheaders();
+            $token = substr($headers['Authorization'], 7);
+            if (!$token){
+                setHTTPStatus("401", "Unauthorized");
+                break;
+            }
 
-    if (($timestamp = strtotime($date)) === false) {
-        setHTTPStatus('400', 'Invalid value for attribute date');
-        return;
-    }
+            $id = $_GET["id"];
+            if (!$id){
+                setHTTPStatus('400', 'ID is required attribute');
+                break;
+            }
 
-    $keysQuery = "SELECT 
-    k.id AS key_id,
-    k.room AS room,
-    k.building AS building,
-    COALESCE(sk.time, null) AS time,
-    u.name AS name,
-    u.role AS role,
-    u.id AS user,
-    k.user_id AS currentKeeperID,  -- Добавляем идентификатор владельца ключа
-    ku.name AS currentName,  -- Имя владельца ключа
-    ku.role AS currentKeeperRole,  -- Роль владельца ключа
-    ARRAY_AGG(
-        JSON_BUILD_OBJECT(
-            'name', u.name,
-            'role', u.role,
-            'userID', u.id,
-            'time', sk.time
-        ) ORDER BY sk.time
-    ) AS bookedTime
-    FROM 
-        \"keys\" k
-    LEFT JOIN 
-        (SELECT * FROM \"keyStatusOLD\" WHERE \"date\" = '$date') sk ON k.id = sk.\"idKey\"
-    LEFT JOIN 
-        users u ON sk.\"idUser\" = u.\"id\"
-    LEFT JOIN 
-        users ku ON k.user_id = ku.id
-    WHERE 
-        1 = 1
-        " . ($room != NULL ? "AND k.room = '$room'" : "") . 
-        ($building != NULL ? "AND k.building = '$building'" : "") .
-    "GROUP BY
-    k.id, k.room, k.building, sk.time, u.name, u.role, u.id, ku.name, ku.role, k.user_id"; 
+            if (!is_numeric($id) || $id < 1){
+                setHTTPStatus('400', 'key ID incorrect format');
+                break;
+            }
+                       
+            $userIDQuery = "SELECT userid FROM tokens WHERE token = '$token'";
+            $userIDResult = pg_query($Link, $userIDQuery);
+
+            $userFromToken = pg_fetch_assoc($userIDResult);
+            if (!is_null($userFromToken)) {
+                $userID = $userFromToken['userid'];
+            
+                $keysQuery = "SELECT id FROM keys WHERE user_id = '$userID' AND keys.id = '$id'";
+                $keysResult = pg_query($Link, $keysQuery);
+
+                if (pg_num_rows($keysResult) === 0) {
+                    setHTTPStatus('403', "You have not key with id = '$id'");
+                    break;
+                } else {
+                    $nextKeeperId = $requestData->body->nextKeeperId;
+                    if (!$nextKeeperId){
+                        setHTTPStatus('400', 'nextKeeperId is required attribute');
+                        break;
+                    }
+
+                    if (!is_numeric($nextKeeperId) || $nextKeeperId < 1){
+                        setHTTPStatus('400', 'nextKeeperId is incorrect format');
+                        break;
+                    }
+
+                    $KeeperIdQuery = "SELECT id FROM users WHERE id = '$nextKeeperId'";
+                    $KeeperIdResult = pg_query($Link, $KeeperIdQuery);
+
+                    if ($KeeperIdResult == False){
+                        echo "Ошибка при выполнении запроса: " . pg_last_error($Link);
+                    } else{
+                        if (pg_num_rows($KeeperIdResult) === 0) {
+                            setHTTPStatus('400', 'nextKeeperId is undefined');
+                            break;
+                        }
+                    }
 
 
-// Выполнение запроса
-$keysResult = pg_query($Link, $keysQuery);
 
-// Проверяем, успешно ли выполнен запрос
-if ($keysResult) {
-    // Массив для хранения ключей и их связанных данных
-    $keys = array();
-    // Обработка результатов запроса
-    while ($keyRow = pg_fetch_assoc($keysResult)) {
-        $keyId = trim($keyRow['key_id']);
-    
-        // Формирование ключа, если его еще нет в массиве
-        if (!array_key_exists($keyId, $keys)) {
-            $keys[$keyId] = array(
-                'id' => $keyId,
-                'room' => $keyRow['room'],
-                'building' => $keyRow['building'],
-                'currentName' => $keyRow['currentname'],
-                'currentKeeperRole' => $keyRow['currentkeeperrole'],
-                'currentKeeperID' => $keyRow['currentkeeperid'],
-                'bookedTime' => array()
-            );
-        }
-    
-        // Проверяем наличие данных о забронированном времени
-        if (isset($keyRow['time'])) {
-            // Добавляем данные о забронированном времени для текущего ключа
-            $keys[$keyId]['bookedTime'][] = array(
-                'name' => trim($keyRow['name']),
-                'role' => trim($keyRow['role']),
-                'userID' => trim($keyRow['user']),
-                'time' => trim($keyRow['time'])
-            );
-        }
-    }
+                    $updateKeeperKey = "UPDATE keys SET user_id = '$nextKeeperId' WHERE id = '$id'";
+                    $updateResult = pg_query($Link, $updateKeeperKey);
+                    if ($updateResult) {
+                        setHTTPStatus('200', 'Data is update');
+                        break;
+                    } else {
+                        setHTTPStatus('500', 'Server Error');
+                        break;
+                    }
+                }
+            }
+                
 
-    $keys = array_values($keys);
-
-    $paginatedKeys = array_chunk($keys, $size, true);
-
-    // Получаем данные только для текущей страницы
-    $currentKeys = $paginatedKeys[$page - 1];
-
-    $count = count($keys);
-    $pageCount = ceil($count / $size);
-
-    if (!validatePage($page, $count))
-    {
-        setHTTPStatus('400', 'Invalid value for attribute page');
-        return;
-    }
-
-    $output = array(
-        'keys' => $currentKeys,
-        'pagination' => array(
-            'size' => $size,
-            'count' => $pageCount,
-            'current' => $page
-        )
-    );
-
-    
-    echo json_encode($output);
-    } else {
-    echo "Ошибка при выполнении запроса: " . pg_last_error($Link);
+        break;
+    default:
+        setHTTPStatus("400", "You can only use GET");
+        break;
     }
 
 }
