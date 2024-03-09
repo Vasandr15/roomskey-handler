@@ -117,7 +117,7 @@ if ($keysResult) {
     $paginatedKeys = array_chunk($keys, $size, true);
 
     // Получаем данные только для текущей страницы
-    $currentKeys = $paginatedKeys[$page - 1];
+    $currentKeys = array_values($paginatedKeys[$page - 1]);
 
     $count = count($keys);
     $pageCount = ceil($count / $size);
@@ -136,59 +136,11 @@ if ($keysResult) {
             'current' => $page
         )
     );
-
-//     $infoUserKeeper = "SELECT 
-//     k.user_id,
-//     u.name AS currentName,
-//     u.role AS currentKeeperRole
-//     FROM 
-//         keys k
-//     LEFT JOIN 
-//         usersold u ON k.user_id = u.id";
-
-//     // Выполнение нового запроса
-//    // Выполнение нового запроса
-//     // Выполнение нового запроса
-//     $result = pg_query($Link, $infoUserKeeper);
-
-//     if (!$result) {
-//         echo "Ошибка выполнения запроса";
-//     } else {
-//         // Обработка результатов
-//         while ($row = pg_fetch_assoc($result)) {
-//             $user_id = $row['user_id'];
-//             $currentName = $row['currentname'];
-//             $currentKeeperRole = $row['currentkeeperrole'];
-//             echo "User ID: " . $user_id . ", Current Name: " . $currentName . ", Current Role: " . $currentKeeperRole . "<br>";
-//         }
-//     }
-
-
-
     
     echo json_encode($output);
     } else {
     echo "Ошибка при выполнении запроса: " . pg_last_error($Link);
     }
-
-//     $query = "SELECT u.*, sk.* 
-//     FROM \"users\" u 
-//     LEFT JOIN \"statusKey\" sk 
-//     ON u.id = sk.\"idUser\"
-//     WHERE sk.\"idUser\" IS NOT NULL";
-
-//     // Выполнение запроса
-//     $result = pg_query($Link, $query);
-
-// if (!$result) {
-//     echo "Ошибка выполнения запроса";
-// } else {
-//     // Обработка результатов
-//     while ($row = pg_fetch_assoc($result)) {
-//         // Вывод данных для отладки
-//         var_dump($row);
-//     }
-// }
 
 }
 ?>
