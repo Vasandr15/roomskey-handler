@@ -6,7 +6,12 @@
             switch ($urlList[2]) {
                 case '':
                     // echo "ento PATCH";
-                    $token = substr(getallheaders()["Authorization"], 7);
+                    $headers = apache_request_headers();
+                    $headers = array_change_key_case($headers, CASE_LOWER);
+
+                    $authHeader = isset($headers['authorization']) ? $headers['authorization'] : null;
+                    $token = substr($authHeader, 7);
+
                     $bidIdForChange = $_GET["id"];
                     $status = $requestData->body->status;
                     $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
@@ -37,13 +42,17 @@
         else if ($method == "POST") {
             if ($urlList[2] == "repeat") {
                 // echo "ento POST";
-                $token = substr(getallheaders()["Authorization"], 7);
+                $headers = apache_request_headers();
+                $headers = array_change_key_case($headers, CASE_LOWER);
+
+                $authHeader = isset($headers['authorization']) ? $headers['authorization'] : null;
+                $token = substr($authHeader, 7);
+
                 $bidId = $_GET["id"];
 
                 $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
                 $roleUser = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$userId'"))['role'];
                 $repeatableCheck = pg_fetch_assoc(pg_query($Link, "SELECT repeatable FROM keystatus Where id='$bidId'"))['repeatable'];
-                echo $roleUser; 
                 
                 $infoAboutBid = pg_fetch_assoc(pg_query($Link, "SELECT idkey, time, date, iduser FROM keystatus Where id='$bidId'"));
                 $idkey = $infoAboutBid['idkey'];
@@ -57,12 +66,10 @@
                 $date =  date('Y-m-d', $date);
 
                 $infoBidOnNextWeek = pg_fetch_assoc(pg_query($Link, "SELECT iduser, id FROM keystatus Where date='$date' and time='$time' and idkey='$idkey'"));
-                echo $infoBidOnNextWeek['id'];
                 $idBidOnNextWeek = $infoBidOnNextWeek['id'];
                 $idUserWhoHaveBidOnNextWeek = $infoBidOnNextWeek['iduser'];
                 $roleUserWhoHaveBidOnNextWeek = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$idUserWhoHaveBidOnNextWeek'"))['role'];
                 
-                echo json_encode($roleUserWhoHaveBidOnNextWeek);
                 if ($roleUserWhoHaveBidOnNextWeek === '' || $roleUserWhoHaveBidOnNextWeek === null) {
                     if ($roleUser === "admin" || $roleUser === "dean") {
                         if ($repeatableCheck === 't') {
@@ -137,7 +144,14 @@
         else if ($method == "GET") {
             switch ($urlList[2]) {
                 case '':
-                    // сделать показ заявок под определенные роли, учитель получает только свои, студент только свои, админ и деканат все
+                    $headers = apache_request_headers();
+                    $headers = array_change_key_case($headers, CASE_LOWER);
+
+                    $authHeader = isset($headers['authorization']) ? $headers['authorization'] : null;
+                    $token = substr($authHeader, 7);
+                    $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
+                    $role = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$userId'"))['role'];
+                    
                     $page = $_GET["page"] ?? 1;
                     $size = $_GET["size"] ?? 10;
                     $sort = $_GET["sort"] ?? 'ASC';
@@ -149,49 +163,94 @@
                             $sort = "ASC";
                         }
                     }
+                    if ($role === "admin" || $role === "dean") {
+                        $bidInDB = pg_query($Link, "SELECT id, iduser, idkey FROM keystatus ORDER BY date $sort");
+                        $bids = [];
+                        while ($row = pg_fetch_assoc($bidInDB)) {
+                            $bidId = $row['id'];
+                            $bidUserId = $row['iduser'];
+                            $bidKeyId = $row['idkey'];
+                            
+                            $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where id='$bidKeyId'"));
+                            
+                            $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status, repeatable FROM keystatus Where id='$bidId'"));
+                            $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
 
-                    $bidInDB = pg_query($Link, "SELECT id, iduser, idkey FROM keystatus ORDER BY date $sort");
-                    $bids = [];
-                    while ($row = pg_fetch_assoc($bidInDB)) {
-                        $bidId = $row['id'];
-                        $bidUserId = $row['iduser'];
-                        $bidKeyId = $row['idkey'];
-                        
-                        $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where id='$bidKeyId'"));
-                        
-                        $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status, repeatable FROM keystatus Where id='$bidId'"));
-                        $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
+                            $bid = [
+                                "room" => $buildingFromTheRequest['room'],
+                                "building" => $buildingFromTheRequest['building'],
+                                "date" => $bidFromTheRequest['date'],
+                                "time" => $bidFromTheRequest['time'],
+                                "status" => $bidFromTheRequest['status'],
+                                "keyId" => $bidKeyId,
+                                "repeatable" => $bidFromTheRequest['repeatable'],
+                                "userId" => $bidUserId,
+                                "userName" => $userFromTheRequest['name'],
+                                "role" => $userFromTheRequest['role']
+                            ];
+                            array_push($bids, $bid);
+                        }
 
-                        $bid = [
-                            "room" => $buildingFromTheRequest['room'],
-                            "building" => $buildingFromTheRequest['building'],
-                            "date" => $bidFromTheRequest['date'],
-                            "time" => $bidFromTheRequest['time'],
-                            "status" => $bidFromTheRequest['status'],
-                            "keyId" => $bidKeyId,
-                            "repeatable" => $bidFromTheRequest['repeatable'],
-                            "userId" => $bidUserId,
-                            "userName" => $userFromTheRequest['name'],
-                            "role" => $userFromTheRequest['role']
+                        $pagination = [
+                            "size" => $size,
+                            "count" => ceil(count($bids)/$size),
+                            "current" => $page
                         ];
-                        array_push($bids, $bid);
-                    }
 
-                    $pagination = [
-                        "size" => $size,
-                        "count" => ceil(count($bids)/$size),
-                        "current" => $page
-                    ];
-
-                    if ($page < 0 OR $page > ceil(count($bids)/$size)) {
-                        setHTTPStatus("400", "Incorrect page");
+                        if ($page < 0 OR $page > ceil(count($bids)/$size)) {
+                            setHTTPStatus("400", "Incorrect page");
+                        } else {
+                            $responseBody = [
+                                "bids" => array_slice($bids, ($page-1)*$size, $size),
+                                "pagination" => $pagination
+                            ];
+                            echo json_encode($responseBody);
+                        }
                     } else {
-                        $responseBody = [
-                            "bids" => array_slice($bids, ($page-1)*$size, $size),
-                            "pagination" => $pagination
+                        $bidInDB = pg_query($Link, "SELECT id, iduser, idkey FROM keystatus WHERE iduser='$userId' ORDER BY date $sort");
+                        $bids = [];
+                        while ($row = pg_fetch_assoc($bidInDB)) {
+                            $bidId = $row['id'];
+                            $bidUserId = $row['iduser'];
+                            $bidKeyId = $row['idkey'];
+                            
+                            $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where id='$bidKeyId'"));
+                            
+                            $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status, repeatable FROM keystatus Where id='$bidId'"));
+                            $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
+
+                            $bid = [
+                                "room" => $buildingFromTheRequest['room'],
+                                "building" => $buildingFromTheRequest['building'],
+                                "date" => $bidFromTheRequest['date'],
+                                "time" => $bidFromTheRequest['time'],
+                                "status" => $bidFromTheRequest['status'],
+                                "keyId" => $bidKeyId,
+                                "repeatable" => $bidFromTheRequest['repeatable'],
+                                "userId" => $bidUserId,
+                                "userName" => $userFromTheRequest['name'],
+                                "role" => $userFromTheRequest['role']
+                            ];
+                            array_push($bids, $bid);
+                        }
+
+                        $pagination = [
+                            "size" => $size,
+                            "count" => ceil(count($bids)/$size),
+                            "current" => $page
                         ];
-                        echo json_encode($responseBody);
+
+                        if ($page < 0 OR $page > ceil(count($bids)/$size)) {
+                            setHTTPStatus("400", "Incorrect page");
+                        } else {
+                            $responseBody = [
+                                "bids" => array_slice($bids, ($page-1)*$size, $size),
+                                "pagination" => $pagination
+                            ];
+                            echo json_encode($responseBody);
+                        }
                     }
+                    
 
                 break;
             }

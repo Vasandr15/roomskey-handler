@@ -25,7 +25,7 @@
     {
         return $_SERVER['REQUEST_METHOD'];
     }
-    header('content-type: Application/json');
+    header('content-type: application/json');
 
     $host = '79.133.183.21';
     $dbname = 'keysHandler';
