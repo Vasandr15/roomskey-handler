@@ -6,7 +6,7 @@
             switch ($urlList[2]) {
                 case '':
                     // echo "ento PATCH";
-                    $token = substr(getallheaders()["authorization"], 7);
+                    $token = substr(getallheaders()["Authorization"], 7);
                     $bidIdForChange = $_GET["id"];
                     $status = $requestData->body->status;
                     $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
@@ -37,17 +37,13 @@
         else if ($method == "POST") {
             if ($urlList[2] == "repeat") {
                 // echo "ento POST";
-                $token = substr(getallheaders()["authorization"], 7);
+                $token = substr(getallheaders()["Authorization"], 7);
                 $bidId = $_GET["id"];
 
                 $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
                 $roleUser = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$userId'"))['role'];
                 $repeatableCheck = pg_fetch_assoc(pg_query($Link, "SELECT repeatable FROM keystatus Where id='$bidId'"))['repeatable'];
-                echo $roleUser;
-
-
-                //если репитб тру то создаеться сразу подтвержденная
-                //если дата пустая, то создется, если студент, то она дропается и преподская подтверждается, если препод занял, то преподская в подвтерждение 
+                echo $roleUser; 
                 
                 $infoAboutBid = pg_fetch_assoc(pg_query($Link, "SELECT idkey, time, date, iduser FROM keystatus Where id='$bidId'"));
                 $idkey = $infoAboutBid['idkey'];

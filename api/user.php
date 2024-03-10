@@ -105,7 +105,7 @@ function route($method, $urlList, $requestData) {
         switch ($urlList[2]) {
             case 'profile':
                 // echo "ento GET profile";
-                $token = substr(getallheaders()["authorization"], 7);
+                $token = substr(getallheaders()["Authorization"], 7);
     
                 $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
                 $user = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));
@@ -121,7 +121,7 @@ function route($method, $urlList, $requestData) {
                 $size = $_GET["size"] ?? 10;
                 $sort = $_GET["sort"];
 
-                $token = substr(getallheaders()["authorization"], 7);
+                $token = substr(getallheaders()["Authorization"], 7);
                 
                 if ($sort !== "") {
                     if ($sort[6] === "D") {
@@ -250,7 +250,7 @@ function route($method, $urlList, $requestData) {
         switch ($urlList[2]) {
             case '':
                 // echo "ento PATCH";
-                $token = substr(getallheaders()["authorization"], 7);
+                $token = substr(getallheaders()["Authorization"], 7);
                 
                 $userId = $_GET["id"];
                 $role = $requestData->body->role;
@@ -275,7 +275,7 @@ function route($method, $urlList, $requestData) {
             $phone = $requestData->body->phone;
             $avatarLink = $requestData->body->avatarLink;
            
-            $token = substr(getallheaders()["authorization"], 7);
+            $token = substr(getallheaders()["Authorization"], 7);
 
             $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
 
@@ -293,7 +293,7 @@ function route($method, $urlList, $requestData) {
             case 'logout':
                 // echo "ento DELETE logout";
 
-                $token = substr(getallheaders()["authorization"], 7);
+                $token = substr(getallheaders()["Authorization"], 7);
                 $findToken = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens Where token='$token'"))['token'];
 
                 if (!$findToken) {

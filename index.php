@@ -25,9 +25,7 @@
     {
         return $_SERVER['REQUEST_METHOD'];
     }
-    $headers = getallheaders();
-    $headers = mb_strtolower($headers);
-    header('content-type: application/json');
+    header('content-type: Application/json');
 
     $host = '79.133.183.21';
     $dbname = 'keysHandler';
@@ -51,11 +49,15 @@
 
     $object = $urlList[0] . '/';
     $router = $urlList[1];
+    // echo realpath(dirname(__FILE__)) . '/api/' . $router . '.php';
+    // echo $url ;
+    // echo 'api/' . $router . '.php';
     $requestData = getData(getMethod());
     $method = getMethod();
 
     if (file_exists(realpath(dirname(__FILE__)) . '/' . $object .  $router . '.php'))
     {   
+        // echo $object . $router . '.php';
         include_once $object . $router . '.php';
         route($method, $urlList, $requestData);
     }
