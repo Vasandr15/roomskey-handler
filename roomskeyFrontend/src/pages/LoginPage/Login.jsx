@@ -1,13 +1,24 @@
 import {useEffect, useState} from 'react';
-import {Form, Input, Button, Card, Flex, Typography} from 'antd';
+import {Form, Input, Button, Card, Flex, Typography, message} from 'antd';
 import {Link} from "react-router-dom";
 import styles from './login.module.css'
 import {Validations} from "../../consts/validations.js";
+import {routes} from "../../consts/routes.js";
+import {MaskedInput} from "antd-mask-input";
+import {loginUser} from "../../API/loginUser.js";
 
 const {Title} = Typography;
 const LoginForm = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
+
+    const notify = (type, message) =>{
+        messageApi.open({
+            type: type,
+            content: message,
+        });
+    }
 
     useEffect(() => {
         document.body.classList.add(styles.backgroundImage);
@@ -16,22 +27,34 @@ const LoginForm = () => {
         }
     }, []);
 
-    const onFinish = (values) => {
+    const onFinish = async (values) => {
         setLoading(true);
         console.log('Received values of form:', values);
-        // api request here
+        let token = await loginUser(values);
+        console.log(token)
+        if (token) {
+            notify('success',
+                'Вы успешно вошли');
+        } else {
+            notify('error',
+                'Неверный логин или пароль')
+        }
+        localStorage.setItem("token", token)
         setTimeout(() => {
             setLoading(false);
-        }, 4000);
+        }, 1000);
+        //add navigation
     };
 
     return (
         <div className={styles.formContainer}>
+            {contextHolder}
             <Card className={styles.antCard}>
                 <Form form={form} name="login" onFinish={onFinish} layout="vertical" initialValues={{remember: true,}}>
                     <Title>Вход</Title>
-                    <Form.Item name="email" label="Email" rules={Validations.emailValidation()}>
-                        <Input/>
+                    <Form.Item
+                        name="phone" label="Номер телефона" rules={Validations.phoneValidation()}>
+                        <MaskedInput mask={"+7 (000) 000-00-00"}/>
                     </Form.Item>
                     <Form.Item name="password" label="Пароль" hasFeedback rules={Validations.passwordValidation()}>
                         <Input.Password/>
@@ -45,7 +68,7 @@ const LoginForm = () => {
                     </Flex>
                 </Form>
                 <div style={{textAlign: 'center'}}>
-                    Еще нет аккаунта? <a>Зарегестрироваться</a> {/*add link*/}
+                    Еще нет аккаунта?
                 </div>
             </Card>
         </div>);
