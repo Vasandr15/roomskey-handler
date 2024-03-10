@@ -5,15 +5,24 @@
         if ($method == "PATCH") {
             switch ($urlList[2]) {
                 case '':
-                    echo "ento PATCH";
+                    // echo "ento PATCH";
                     $token = substr(getallheaders()["Authorization"], 7);
-
-                    $bidInDB = pg_query($Link, "SELECT iduser FROM keystatus ORDER BY date $sort");
+                    $bidIdForChange = $_GET["id"];
+                    $status = $requestData->body->status;
+                    
+                    $statusUpdateResult = pg_query($Link, "UPDATE keystatus SET status = '$status' Where id='$bidIdForChange'");
+                    
+                    if (!$statusUpdateResult) {
+                        setHTTPStatus("400", "Bad Request");
+                    } else {
+                        setHTTPStatus("200", "Application confirmed successfully");
+                    }
 
                 break;
             }
         }
         else if ($method == "POST") {
+            // TODO сделать чтобы адекватно можно было работать с url
             if (is_string('') && $urlList[3] == "repeat") {
                 echo "ento POST";
                 echo $urlList[2];
@@ -35,17 +44,27 @@
                         }
                     }
 
-                    $bidInDB = pg_query($Link, "SELECT iduser FROM keystatus ORDER BY date $sort");
-                    $application = [];
+                    $bidInDB = pg_query($Link, "SELECT id, iduser, idkey FROM keystatus ORDER BY date $sort");
+                    $bids = [];
                     while ($row = pg_fetch_assoc($bidInDB)) {
-                        $userId = $row['iduser'] . ' ';
+                        $bidId = $row['id'];
+                        $bidUserId = $row['iduser'];
+                        $bidKeyId = $row['idkey'];
                         
-                        $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where user_id='$userId'"));
+                        $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where id='$bidKeyId'"));
                         
-                        $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status, idkey FROM keystatus Where iduser='$userId'"));
-                        echo $bidFromTheRequest['date'];
-                        echo json_encode($bidFromTheRequest);
-                        $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT id, name FROM users Where id='$userId'"));
+                        $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status FROM keystatus Where id='$bidId'"));
+                        $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
+
+                        $time = $bidFromTheRequest['time'];
+                        $date = $bidFromTheRequest['date'];
+                        $repeatableCheck = pg_fetch_array(pg_query($Link, "SELECT id FROM keystatus Where iduser='$bidUserId' and idkey='$bidKeyId' and time='$time' and date<>'$date'"));
+
+                        if (is_iterable($repeatableCheck)) {
+                            $repeatable = true;
+                        } else {
+                            $repeatable = false;
+                        }
 
                         $bid = [
                             "room" => $buildingFromTheRequest['room'],
@@ -53,25 +72,26 @@
                             "date" => $bidFromTheRequest['date'],
                             "time" => $bidFromTheRequest['time'],
                             "status" => $bidFromTheRequest['status'],
-                            "keyId" => $bidFromTheRequest['idkey'],
+                            "keyId" => $bidKeyId,
                             "repeatable" => $repeatable,
-                            "userId" => $userFromTheRequest['id'],
-                            "userName" => $userFromTheRequest['name']
+                            "userId" => $bidUserId,
+                            "userName" => $userFromTheRequest['name'],
+                            "role" => $userFromTheRequest['role']
                         ];
-                        array_push($application, $bid);
+                        array_push($bids, $bid);
                     }
 
                     $pagination = [
                         "size" => $size,
-                        "count" => ceil(count($application)/$size),
+                        "count" => ceil(count($bids)/$size),
                         "current" => $page
                     ];
 
-                    if ($page < 0 OR $page > 3) {
+                    if ($page < 0 OR $page > ceil(count($bids)/$size)) {
                         setHTTPStatus("400", "Incorrect page");
                     } else {
                         $responseBody = [
-                            "application" => array_slice($application, ($page-1)*$size, $size),
+                            "bids" => array_slice($bids, ($page-1)*$size, $size),
                             "pagination" => $pagination
                         ];
                         echo json_encode($responseBody);
