@@ -11,47 +11,47 @@ function validatePage($page, $count)
     return false;
 }
 
-function checkTime($time){
-    switch(time)
+function checkTime($curTime){
+    switch($curTime)
     {
         case "1":
-            if ('8:45' > date('H:i:s')){
+            if ('08:45' > date('H:i')){
                 return true;
             }
             return false;
             break;
         case "2":
-            if ('10:35' > date('H:i:s')){
+            if ('10:35' > date('H:i')){
                 return true;
             }
             return false;
             break;
         case "3":
-            if ('12:25' > date('H:i:s')){
+            if ('12:25' > date('H:i')){
                 return true;
             }
             return false;
             break;
         case "4":
-            if ('14:45' > date('H:i:s')){
+            if ('14:45' > date('H:i')){
                 return true;
             }
             return false;
             break;
         case "5":
-            if ('16:35' > date('H:i:s')){
+            if ('16:35' > date('H:i')){
                 return true;
             }
             return false;
             break;
         case "6":
-            if ('18:25' > date('H:i:s')){
+            if ('18:25' > date('H:i')){
                 return true;
             }
             return false;
             break;
         case "7":
-            if ('20:15' > date('H:i:s')){
+            if ('20:15' > date('H:i')){
                 return true;
             }
             return false;
@@ -100,17 +100,20 @@ function route($method, $urlList, $requestData)
 
 
                        
-            $userIDQuery = "SELECT userid, role, name FROM tokens WHERE token = '$token'";
-            $userIDResult = pg_query($Link, $userIDQuery);
+            $userDataQuery = "SELECT u.id, u.role, u.name FROM tokens t 
+                  JOIN users u ON u.id = t.userid 
+                  WHERE t.token = '$token'";
+            $userIDResult = pg_query($Link, $userDataQuery);
 
             $userFromToken = pg_fetch_assoc($userIDResult);
             if (!is_null($userFromToken)) {
-                $userID = $userFromToken['userid'];
+                $userID = $userFromToken['id'];
                 $userRole = $userFromToken['role'];
                 $userName = $userFromToken['name'];
 
                 $date = $requestData->body->date;
                 $time = $requestData->body->time;
+
 
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                     setHTTPStatus('400', 'Date is incorrect format');
@@ -122,44 +125,29 @@ function route($method, $urlList, $requestData)
                     break;
                 }
         
-                if (!is_numeric($time) || $time < 1){
+                if (!is_numeric($time) || $time < 1 || $time > 7){
                     setHTTPStatus('400', 'Time is incorrect format');
                     break;
                 }
 
-                if ($date == date('Y-m-d') && (heckTime($time) == False)){
+                if ($date == date('Y-m-d') && (checkTime($time) == False)){
                     setHTTPStatus('400', 'The date must not be past');
                     break;
                 }
 
-
-
+                $checkMyBidQuery = "SELECT id FROM bids WHERE (userid = '$userID' AND "
 
             
-                $keysQuery = "SELECT id FROM bids WHERE (userRole = administrator OR userRole = dean OR userRole = teacher) AND date = '$date' AND time = '$time'";
+                // Исправленный запрос
+                $keysQuery = "SELECT id FROM bids WHERE (userrole = 'administrator' OR userrole = 'dean' OR userrole = 'teacher') AND date = '$date' AND time = '$time' AND status = 'accepted'";
                 $keysResult = pg_query($Link, $keysQuery);
 
                 if (pg_num_rows($keysResult) === 0 || $userRole == 'teacher' || $userRole == 'dean' || $userRole == 'administrator') {
 
-
-                    $KeeperIdQuery = "SELECT id FROM users WHERE id = '$nextKeeperId'";
-                    $KeeperIdResult = pg_query($Link, $KeeperIdQuery);
-
-                    if ($KeeperIdResult == False){
-                        echo "Ошибка при выполнении запроса: " . pg_last_error($Link);
-                    } else{
-                        if (pg_num_rows($KeeperIdResult) === 0) {
-                            setHTTPStatus('400', 'nextKeeperId is undefined');
-                            break;
-                        }
-                    }
-
-
-
-                    $insertQuery = "INSERT INTO bids (keyId, room, building,date,time,status,repeatable, userId, userName, userRole) VALUES ('$id', '$room', '$building', '$date', '$time', 'awaiting confirmation', 0, '$userID', '$userName', '$userRole')";
+                    $insertQuery = "INSERT INTO bids (keyid, room, building,date,time,status,repeatable, userid, username, userrole) VALUES ('$id', '$room', '$building', '$date', '$time', 'awaiting confirmation', False, '$userID', '$userName', '$userRole')";
                     $insertResult = pg_query($Link, $insertQuery);
-                    if ($updateResult) {
-                        setHTTPStatus('200', 'Data is update');
+                    if ($insertResult) {
+                        setHTTPStatus('201', 'The bid created successfully');
                         break;
                     } else {
                         setHTTPStatus('500', 'Server Error');

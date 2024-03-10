@@ -4,9 +4,6 @@
     // include_once 'helpers/searchAdres.php';
 
     date_default_timezone_set('Asia/Tomsk');
-
-    echo  '20:20' < date('H:i:s');
-    echo date('H:i:s');
     
     global $Link;
 
