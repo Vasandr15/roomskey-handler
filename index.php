@@ -50,6 +50,7 @@
 
     $object = $urlList[0] . '/';
     $router = $urlList[1];
+
     $requestData = getData(getMethod());
     $method = getMethod();
 

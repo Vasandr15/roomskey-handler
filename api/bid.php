@@ -6,32 +6,142 @@
             switch ($urlList[2]) {
                 case '':
                     // echo "ento PATCH";
-                    $token = substr(getallheaders()["Authorization"], 7);
+                    $token = substr(getallheaders()["authorization"], 7);
                     $bidIdForChange = $_GET["id"];
                     $status = $requestData->body->status;
-                    
-                    $statusUpdateResult = pg_query($Link, "UPDATE keystatus SET status = '$status' Where id='$bidIdForChange'");
-                    
-                    if (!$statusUpdateResult) {
-                        setHTTPStatus("400", "Bad Request");
+                    $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
+                    $roleUser = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$userId'"));
+
+                    echo $roleUser['role'];
+                    if ($roleUser['role'] === "teacher") {
+                        $statusUpdateResult = pg_query($Link, "UPDATE keystatus SET status = '$status', repeatable = true Where id='$bidIdForChange'");
+                        if (!$statusUpdateResult) {
+                            setHTTPStatus("400", "Bad Request");
+                        } else {
+                            setHTTPStatus("200", "Application confirmed successfully");
+                        }
                     } else {
-                        setHTTPStatus("200", "Application confirmed successfully");
+                        $statusUpdateResult = pg_query($Link, "UPDATE keystatus SET status = '$status' Where id='$bidIdForChange'");
+                        if (!$statusUpdateResult) {
+                            setHTTPStatus("400", "Bad Request");
+                        } else {
+                            setHTTPStatus("200", "Application confirmed successfully");
                     }
+                    }
+                    // при изменение статуса заявки от препода снатовится рупитб
+                    
 
                 break;
             }
         }
         else if ($method == "POST") {
-            // TODO сделать чтобы адекватно можно было работать с url
-            if (is_string('') && $urlList[3] == "repeat") {
-                echo "ento POST";
-                echo $urlList[2];
+            if ($urlList[2] == "repeat") {
+                // echo "ento POST";
+                $token = substr(getallheaders()["authorization"], 7);
+                $bidId = $_GET["id"];
+
+                $userId = pg_fetch_assoc(pg_query($Link, "SELECT userid FROM tokens Where token='$token'"))['userid'];
+                $roleUser = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$userId'"))['role'];
+                $repeatableCheck = pg_fetch_assoc(pg_query($Link, "SELECT repeatable FROM keystatus Where id='$bidId'"))['repeatable'];
+                echo $roleUser;
+
+
+                //если репитб тру то создаеться сразу подтвержденная
+                //если дата пустая, то создется, если студент, то она дропается и преподская подтверждается, если препод занял, то преподская в подвтерждение 
+                
+                $infoAboutBid = pg_fetch_assoc(pg_query($Link, "SELECT idkey, time, date, iduser FROM keystatus Where id='$bidId'"));
+                $idkey = $infoAboutBid['idkey'];
+                $time = $infoAboutBid['time'];
+
+                $idUserWhoMakeBid = $infoAboutBid['iduser'];
+                $roleUserWhoMakeBid = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$idUserWhoMakeBid'"))['role'];
+
+                $date = strtotime($infoAboutBid['date']);
+                $date = strtotime("+7 day", $date);
+                $date =  date('Y-m-d', $date);
+
+                $infoBidOnNextWeek = pg_fetch_assoc(pg_query($Link, "SELECT iduser, id FROM keystatus Where date='$date' and time='$time' and idkey='$idkey'"));
+                echo $infoBidOnNextWeek['id'];
+                $idBidOnNextWeek = $infoBidOnNextWeek['id'];
+                $idUserWhoHaveBidOnNextWeek = $infoBidOnNextWeek['iduser'];
+                $roleUserWhoHaveBidOnNextWeek = pg_fetch_assoc(pg_query($Link, "SELECT role FROM users Where id='$idUserWhoHaveBidOnNextWeek'"))['role'];
+                
+                echo json_encode($roleUserWhoHaveBidOnNextWeek);
+                if ($roleUserWhoHaveBidOnNextWeek === '' || $roleUserWhoHaveBidOnNextWeek === null) {
+                    if ($roleUser === "admin" || $roleUser === "dean") {
+                        if ($repeatableCheck === 't') {
+                            
+                            $statusUpdateResult = pg_query($Link, "INSERT INTO keystatus(idkey, iduser, time, date, status) VALUES ('$idkey', '$idUserWhoMakeBid', '$time', '$date', 'accepted')");
+        
+                            if (!$statusUpdateResult) {
+                                setHTTPStatus("400", "Bad Request");
+                            } else {
+                                setHTTPStatus("200", "Bid successfully repeat");
+                            }
+                        } else {
+                            $statusUpdateResult = pg_query($Link, "INSERT INTO keystatus(idkey, iduser, time, date) VALUES ('$idkey', '$idUserWhoMakeBid', '$time', '$date')");
+        
+                            if (!$statusUpdateResult) {
+                                setHTTPStatus("400", "Bad Request");
+                            } else {
+                                setHTTPStatus("200", "Bid successfully repeat");
+                            }
+                        } 
+                        
+                    } else {
+                        setHTTPStatus("400", "Bad Request");
+                    }
+                } else if ($roleUserWhoHaveBidOnNextWeek === "student" || $roleUserWhoHaveBidOnNextWeek === 'public') {
+                    if ($roleUser === "admin" || $roleUser === "dean") {
+                        if ($repeatableCheck === 't') {
+                            
+                            $dporStatusOldBid = pg_query($Link, "UPDATE keystatus SET status = 'refused' Where id='$idBidOnNextWeek'");
+                            $statusUpdateResult = pg_query($Link, "INSERT INTO keystatus(idkey, iduser, time, date, status) VALUES ('$idkey', '$idUserWhoMakeBid', '$time', '$date', 'accepted')");
+                            
+                            if (!$statusUpdateResult) {
+                                setHTTPStatus("400", "Bad Request");
+                            } else {
+                                setHTTPStatus("200", "Bid successfully repeat");
+                            }
+                        } else {
+
+                            $dporStatusOldBid = pg_query($Link, "UPDATE keystatus SET status = 'refused' Where id='$idBidOnNextWeek'");
+                            $statusUpdateResult = pg_query($Link, "INSERT INTO keystatus(idkey, iduser, time, date) VALUES ('$idkey', '$idUserWhoMakeBid', '$time', '$date')");
+        
+                            if (!$statusUpdateResult) {
+                                setHTTPStatus("400", "Bad Request");
+                            } else {
+                                setHTTPStatus("200", "Bid successfully repeat");
+                            }
+                        }
+                    } else {
+                        setHTTPStatus("400", "Bad Request");
+                    }
+                } else if ($roleUserWhoHaveBidOnNextWeek === "teacher") {
+                    if ($roleUser === "admin" || $roleUser === "dean") {
+                            
+                        $statusUpdateResult = pg_query($Link, "INSERT INTO keystatus(idkey, iduser, time, date) VALUES ('$idkey', '$idUserWhoMakeBid', '$time', '$date')");
+                        
+                        if (!$statusUpdateResult) {
+                            setHTTPStatus("400", "Bad Request");
+                        } else {
+                            setHTTPStatus("200", "Bid successfully repeat");
+                        }
+                    } else {
+                        setHTTPStatus("400", "Bad Request");
+                    }
+                }
+
+                
+                
+                
+                
             }
         }
         else if ($method == "GET") {
             switch ($urlList[2]) {
                 case '':
-
+                    // сделать показ заявок под определенные роли, учитель получает только свои, студент только свои, админ и деканат все
                     $page = $_GET["page"] ?? 1;
                     $size = $_GET["size"] ?? 10;
                     $sort = $_GET["sort"] ?? 'ASC';
@@ -53,18 +163,8 @@
                         
                         $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where id='$bidKeyId'"));
                         
-                        $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status FROM keystatus Where id='$bidId'"));
+                        $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status, repeatable FROM keystatus Where id='$bidId'"));
                         $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
-
-                        $time = $bidFromTheRequest['time'];
-                        $date = $bidFromTheRequest['date'];
-                        $repeatableCheck = pg_fetch_array(pg_query($Link, "SELECT id FROM keystatus Where iduser='$bidUserId' and idkey='$bidKeyId' and time='$time' and date<>'$date'"));
-
-                        if (is_iterable($repeatableCheck)) {
-                            $repeatable = true;
-                        } else {
-                            $repeatable = false;
-                        }
 
                         $bid = [
                             "room" => $buildingFromTheRequest['room'],
@@ -73,7 +173,7 @@
                             "time" => $bidFromTheRequest['time'],
                             "status" => $bidFromTheRequest['status'],
                             "keyId" => $bidKeyId,
-                            "repeatable" => $repeatable,
+                            "repeatable" => $bidFromTheRequest['repeatable'],
                             "userId" => $bidUserId,
                             "userName" => $userFromTheRequest['name'],
                             "role" => $userFromTheRequest['role']
