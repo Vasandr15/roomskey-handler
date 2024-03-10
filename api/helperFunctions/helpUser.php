@@ -21,7 +21,8 @@
     }
 
     function validatePhone($phone) {
-        if (ctype_digit($phone)) {
+        $PHONE_REGEX = '/^\+7\s*\(\d{3}\)\s*\d{3}(-\d{2}){2}\s*$/';
+        if (preg_match($PHONE_REGEX, $phone)) {
             return true;
         }
         return false;

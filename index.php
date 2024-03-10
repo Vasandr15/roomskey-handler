@@ -1,5 +1,5 @@
 <?php
-    include_once 'endpoints/helperFunctions/headers.php';
+    include_once 'api/helperFunctions/headers.php';
     
     global $Link;
 
@@ -48,14 +48,18 @@
     $url = rtrim($url, '/');
     $urlList = explode('/', $url);
 
+    $object = $urlList[0] . '/';
     $router = $urlList[0];
+    // echo realpath(dirname(__FILE__)) . '/api/' . $router . '.php';
+    // echo $url ;
+    // echo 'api/' . $router . '.php';
     $requestData = getData(getMethod());
     $method = getMethod();
 
-
-    if (file_exists(realpath(dirname(__FILE__)).'/endpoints/' . $router . '.php'))
-    {       
-        include_once 'endpoints/' . $router . '.php';
+    if (file_exists(realpath(dirname(__FILE__)) . '/api/' .  $router . '.php'))
+    {   
+        // echo $object . $router . '.php';
+        include_once 'api/' . $router . '.php';
         route($method, $urlList, $requestData);
     }
     else
