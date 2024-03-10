@@ -135,16 +135,14 @@ function route($method, $urlList, $requestData)
                     break;
                 }
 
-                $checkMyBidQuery = "SELECT id FROM bids WHERE (userid = '$userID' AND "
-
             
                 // Исправленный запрос
-                $keysQuery = "SELECT id FROM bids WHERE (userrole = 'administrator' OR userrole = 'dean' OR userrole = 'teacher') AND date = '$date' AND time = '$time' AND status = 'accepted'";
+                $keysQuery = "SELECT iduser FROM keystatus WHERE date = '$date' AND time = '$time' AND status = 'accepted'";
                 $keysResult = pg_query($Link, $keysQuery);
 
-                if (pg_num_rows($keysResult) === 0 || $userRole == 'teacher' || $userRole == 'dean' || $userRole == 'administrator') {
+                if (pg_num_rows($keysResult) === 0) {
 
-                    $insertQuery = "INSERT INTO bids (keyid, room, building,date,time,status,repeatable, userid, username, userrole) VALUES ('$id', '$room', '$building', '$date', '$time', 'awaiting confirmation', False, '$userID', '$userName', '$userRole')";
+                    $insertQuery = "INSERT INTO keystatus (idkey,date,time,status,repeatable, iduser) VALUES ('$id', '$date', '$time', 'awaiting confirmation', False, '$userID')";
                     $insertResult = pg_query($Link, $insertQuery);
                     if ($insertResult) {
                         setHTTPStatus('201', 'The bid created successfully');
@@ -153,11 +151,32 @@ function route($method, $urlList, $requestData)
                         setHTTPStatus('500', 'Server Error');
                         break;
                     }
-                } else {
-                    setHTTPStatus('400', "This time is occupied by the teacher");
-                    break;
-                    
-                }
+                } else{
+                    $arrayKeysResult = pg_fetch_assoc($keysResult);
+                    $acceptedId = $arrayKeysResult['iduser'];
+
+                    $roleAcceptedQuerry = "SELECT role FROM users WHERE id = '$acceptedId'";
+                    $roleAcceptedResult = pg_query($Link, $roleAcceptedQuerry);
+
+                    $roleResult = pg_fetch_assoc($roleAcceptedResult);
+                    $resultRole = $roleResult['role'];
+
+                    if ($resultRole == 'student' || $userRole == 'teacher' || $userRole == 'dean' || $userRole == 'administrator'){
+
+                        $insertQuery = "INSERT INTO keystatus (idkey,date,time,status,repeatable, iduser) VALUES ('$id', '$date', '$time', 'awaiting confirmation', False, '$userID')";
+                        $insertResult = pg_query($Link, $insertQuery);
+                        if ($insertResult) {
+                            setHTTPStatus('201', 'The bid created successfully');
+                            break;
+                        } else {
+                            setHTTPStatus('500', 'Server Error');
+                            break;
+                        }
+                    }else {
+                        setHTTPStatus('400', "This time is occupied by the teacher");
+                        break;
+                    }
+                } 
             } else{
                 setHTTPStatus("401", "Unauthorized");
                 break;
