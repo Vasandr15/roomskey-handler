@@ -3,7 +3,7 @@ function route($method, $urlList, $requestData) {
     include_once 'api/helperFunctions/helpUser.php';
     global $Link;
     if($method == "POST") {   
-        switch ($urlList[1]) {
+        switch ($urlList[2]) {
             case 'login':
                 // echo "ento login!!!";
                 $phone = $requestData->body->phone;
@@ -102,7 +102,7 @@ function route($method, $urlList, $requestData) {
         
     }
     else if ($method == "GET") {
-        switch ($urlList[1]) {
+        switch ($urlList[2]) {
             case 'profile':
                 // echo "ento GET profile";
                 $token = substr(getallheaders()["Authorization"], 7);
@@ -246,7 +246,7 @@ function route($method, $urlList, $requestData) {
         }
     }
     else if ($method == "PATCH") {
-        switch ($urlList[1]) {
+        switch ($urlList[2]) {
             case '':
                 // echo "ento PATCH";
                 $token = substr(getallheaders()["Authorization"], 7);
@@ -266,7 +266,7 @@ function route($method, $urlList, $requestData) {
         }
     }
     else if ($method == "PUT") {
-        if ($urlList[1] == "profile" && $urlList[2] == "update") {
+        if ($urlList[2] == "profile" && $urlList[3] == "update") {
             // echo "ento PUT profile update";
 
             $name = $requestData->body->name;
@@ -288,7 +288,7 @@ function route($method, $urlList, $requestData) {
         }
     }
     else if ($method == "DELETE") {
-        switch ($urlList[1]) {
+        switch ($urlList[2]) {
             case 'logout':
                 // echo "ento DELETE logout";
 
@@ -304,7 +304,7 @@ function route($method, $urlList, $requestData) {
             break;
         }
     } else {
-        setHTTPStatus("400", "You can only use POST to $urlList[1]");
+        setHTTPStatus("400", "You can only use POST to $urlList[2]");
     }
 }
 ?>

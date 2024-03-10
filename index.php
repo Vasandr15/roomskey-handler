@@ -49,17 +49,13 @@
     $urlList = explode('/', $url);
 
     $object = $urlList[0] . '/';
-    $router = $urlList[0];
-    // echo realpath(dirname(__FILE__)) . '/api/' . $router . '.php';
-    // echo $url ;
-    // echo 'api/' . $router . '.php';
+    $router = $urlList[1];
     $requestData = getData(getMethod());
     $method = getMethod();
 
-    if (file_exists(realpath(dirname(__FILE__)) . '/api/' .  $router . '.php'))
+    if (file_exists(realpath(dirname(__FILE__)) . '/' . $object .  $router . '.php'))
     {   
-        // echo $object . $router . '.php';
-        include_once 'api/' . $router . '.php';
+        include_once $object . $router . '.php';
         route($method, $urlList, $requestData);
     }
     else
