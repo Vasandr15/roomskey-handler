@@ -69,8 +69,12 @@ function route($method, $urlList, $requestData)
     {
         case 'POST':
 
-            $headers = getallheaders();
-            $token = substr($headers['Authorization'], 7);
+            $headers = apache_request_headers();
+            $headers = array_change_key_case($headers, CASE_LOWER);
+
+            $authHeader = isset($headers['authorization']) ? $headers['authorization'] : null;
+            $token = substr($authHeader, 7);
+
             if (!$token){
                 setHTTPStatus("401", "Unauthorized");
                 break;
