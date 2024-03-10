@@ -25,8 +25,9 @@
     {
         return $_SERVER['REQUEST_METHOD'];
     }
-
-    header('Content-type: application/json');
+    $headers = getallheaders();
+    $headers = mb_strtolower($headers);
+    header('content-type: application/json');
 
     $host = '79.133.183.21';
     $dbname = 'keysHandler';
@@ -50,7 +51,6 @@
 
     $object = $urlList[0] . '/';
     $router = $urlList[1];
-
     $requestData = getData(getMethod());
     $method = getMethod();
 
