@@ -1,13 +1,13 @@
 import axios from "axios";
-export const registerUser = (data) => {
-    axios.post(`user/register`, data)
-        .then(res => {
-            console.log('Status:', res.status);
-            console.log('Data:', res.data);
-            return  res.status
-        })
-        .catch(error => {
-            console.error('An error occurred:', error.response ? error.response.status : error.message);
-            return error.response.status;
-        });
+
+export const registerUser = async (data) => {
+    try {
+        const response = await axios.post(`api/user/register`, data);
+        console.log('Status:', response.status);
+        console.log('Data:', response.data);
+        return response.data.token; // Return the token from the response data
+    } catch (error) {
+        console.error('An error occurred:', error.response ? error.response.status : error.message);
+        return null;
+    }
 }

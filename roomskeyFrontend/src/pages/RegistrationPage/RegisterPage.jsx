@@ -5,7 +5,7 @@ import {MaskedInput} from 'antd-mask-input';
 import styles from './register.module.css'
 import {Validations} from "../../consts/validations.js";
 import {routes} from "../../consts/routes.js";
-import {cleanUpValues, removeSpaces} from "../../helpers/inputHelpers.js";
+import {cleanUpValues} from "../../helpers/inputHelpers.js";
 import {registerUser} from "../../API/registerUser.js";
 
 const {Title} = Typography;
@@ -29,22 +29,24 @@ const RegistrationForm = () => {
         });
     }
 
-    const onFinish = (values) => {
+    const onFinish = async (values) => {
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
         }, 1000);
         cleanUpValues(values);
         console.log(values);
-        let responseStatus = registerUser(values);
-        if (responseStatus === 200) {
+        let token = await registerUser(values);
+        console.log(token)
+        if (token) {
             notify('success',
                 'Вы успешно зарегестрировались');
-            //add navigation
         } else {
             notify('error',
                 'Пользователь с таким номером телефона уже существует')
         }
+        localStorage.setItem("token", token)
+        //add navigation
     };
 
     return (
