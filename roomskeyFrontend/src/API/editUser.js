@@ -1,8 +1,9 @@
 import axios from "axios";
 
-export const getProfile = async () => {
+export const editUser = async (body) => {
     try {
-        const response = await axios.get(`/api/user/profile`,{
+        const response = await axios.put(`/api/user/profile`, body,
+            {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
             }

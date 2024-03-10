@@ -1,8 +1,8 @@
 import axios from "axios";
 
-export const getProfile = async () => {
+export const logOut = async () => {
     try {
-        const response = await axios.get(`/api/user/profile`,{
+        const response = await axios.delete(`/api/user/logout`,{
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`
             }
