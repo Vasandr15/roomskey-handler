@@ -253,6 +253,40 @@
                     
 
                 break;
+                case 'forVitya':
+                    $headers = apache_request_headers();
+                    $headers = array_change_key_case($headers, CASE_LOWER);
+
+                    $authHeader = isset($headers['authorization']) ? $headers['authorization'] : null;
+                    $token = substr($authHeader, 7);
+
+                    $date = $_GET["date"];
+                    $time = $_GET["time"];
+
+                    $scheduleInDb = pg_fetch_assoc(pg_query($Link, "SELECT iduser FROM keystatus WHERE time='$time' and date='$date'"))['iduser'];
+                    $voidKeys = [];
+
+                    if (is_null($scheduleInDb)) {
+                        $allKeysInDB = pg_query($Link, "SELECT room, building FROM keys ORDER BY room ASC");
+                        while ($row = pg_fetch_assoc($allKeysInDB)) {
+                            $checkKeyOnGiven = pg_fetch_assoc(pg_query($Link, "SELECT idkey FROM keystatus WHERE time='$time' and date='$date' and status<>'accepted'"))['idkey'];
+                            if (is_null($checkKeyOnGiven)) {
+                                $room = [
+                                    "room" => $row['room'],
+                                    "building" => $row['building']
+                                ];
+                                array_push($voidKeys, $room);
+                            }
+                        }
+                        echo json_encode($voidKeys);
+                    } else {
+                        http_response_code(200);
+                        $response = array(
+                                "iduser" => "$scheduleInDb"
+                        );
+                        echo json_encode($response);
+                    }
+                break;
             }
         }
     }
