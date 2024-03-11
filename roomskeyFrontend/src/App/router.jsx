@@ -1,6 +1,6 @@
 import {createBrowserRouter} from "react-router-dom";
 import {routes} from "../consts/routes.js";
-import MainPage from "../pages/MainPage/mainPage.jsx";
+import MainPage from "../pages/MainPage/MainPage.jsx";
 import Login from "../pages/LoginPage/Login.jsx";
 import RegistrationForm from "../pages/RegistrationPage/RegisterPage.jsx";
 import ProfilePage from "../pages/ProfilePage/ProfilePage.jsx";

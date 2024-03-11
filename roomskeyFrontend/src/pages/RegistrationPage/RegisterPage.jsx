@@ -1,10 +1,12 @@
 import {useEffect, useRef, useState} from 'react';
 import {Link} from "react-router-dom";
-import {Form, Input, Button, Card, Flex, Typography} from 'antd';
+import {Form, Input, Button, Card, Flex, Typography, message} from 'antd';
 import {MaskedInput} from 'antd-mask-input';
 import styles from './register.module.css'
 import {Validations} from "../../consts/validations.js";
 import {routes} from "../../consts/routes.js";
+import {cleanUpValues} from "../../helpers/inputHelpers.js";
+import {registerUser} from "../../API/registerUser.js";
 
 const {Title} = Typography;
 
@@ -12,6 +14,7 @@ const RegistrationForm = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const phoneInputRef = useRef(null);
+    const [messageApi, contextHolder] = message.useMessage();
     useEffect(() => {
         document.body.classList.add(styles.backgroundImage);
         return () => {
@@ -19,18 +22,36 @@ const RegistrationForm = () => {
         }
     }, []);
 
+    const notify = (type, message) =>{
+        messageApi.open({
+            type: type,
+            content: message,
+        });
+    }
 
-    const onFinish = (values) => {
+    const onFinish = async (values) => {
         setLoading(true);
-        console.log('Received values of form:', values);
-        // api request here
         setTimeout(() => {
             setLoading(false);
-        }, 4000);
+        }, 1000);
+        cleanUpValues(values);
+        console.log(values);
+        let token = await registerUser(values);
+        console.log(token)
+        if (token) {
+            notify('success',
+                'Вы успешно зарегестрировались');
+        } else {
+            notify('error',
+                'Пользователь с таким номером телефона уже существует')
+        }
+        localStorage.setItem("token", token)
+        //add navigation
     };
 
     return (
         <div className={styles.formContainer}>
+            {contextHolder}
             <Card className={styles.antCard}>
                 <Form form={form} name="registration" onFinish={onFinish} layout="vertical"
                       initialValues={{remember: true,}}
