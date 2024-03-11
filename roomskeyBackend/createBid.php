@@ -165,7 +165,7 @@ function route($method, $urlList, $requestData)
                     $roleResult = pg_fetch_assoc($roleAcceptedResult);
                     $resultRole = $roleResult['role'];
 
-                    if ($resultRole == 'student' || $userRole == 'teacher' || $userRole == 'dean' || $userRole == 'administrator'){
+                    if ($resultRole == 'student' || $userRole == 'teacher' || $userRole == 'dean' || $userRole == 'admin'){
 
                         $insertQuery = "INSERT INTO keystatus (idkey,date,time,status,repeatable, iduser) VALUES ('$id', '$date', '$time', 'awaiting confirmation', False, '$userID')";
                         $insertResult = pg_query($Link, $insertQuery);
