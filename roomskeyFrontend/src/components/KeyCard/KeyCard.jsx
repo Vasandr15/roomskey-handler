@@ -3,8 +3,8 @@ import {Button, Collapse, Space} from "antd";
 import KeyCardChild from "./KeyCardChild.jsx";
 import CustomModal from "../Modal/Modal.jsx";
 
-export default function KeyCard({ isCollapsed }) {
-    const child = <KeyCardChild />;
+export default function KeyCard({ isCollapsed, data, key }) {
+    const child = <KeyCardChild booked={data.bookedTime}/>;
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const renderExtraButton = () => {
@@ -13,16 +13,19 @@ export default function KeyCard({ isCollapsed }) {
         }
         return null;
     };
+
+    console.log(data)
+
     return (
         <Space direction="vertical" style={{ marginBottom: "30px" }}>
             <Collapse
                 className="collapseCard"
                 size="large"
-                activeKey={isCollapsed ? [] : ["1"]}
+                collapsible={isCollapsed ? "disabled" : "header"}
                 items={[
                     {
-                        key: "1",
-                        label: "Ключ 2-218",
+                        key: key,
+                        label: `${data.building}-${data.room}`,
                         children: child,
                         extra: renderExtraButton()
                     },
