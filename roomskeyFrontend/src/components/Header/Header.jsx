@@ -31,7 +31,7 @@ export default function HeaderSection() {
         {key: 'main', label: "Главная"},
     ];
 
-    const isAuth = getProfile();
+    const isAuth = localStorage.getItem('token');
 
     if (isAuth) {
         items.push({key: 'users', label: "Пользователи"},

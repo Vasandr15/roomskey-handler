@@ -7,6 +7,7 @@ import {Validations} from "../../consts/validations.js";
 import {routes} from "../../consts/routes.js";
 import {cleanUpValues} from "../../helpers/inputHelpers.js";
 import {registerUser} from "../../API/registerUser.js";
+import {useNavigate} from "react-router";
 
 const {Title} = Typography;
 
@@ -15,6 +16,8 @@ const RegistrationForm = () => {
     const [loading, setLoading] = useState(false);
     const phoneInputRef = useRef(null);
     const [messageApi, contextHolder] = message.useMessage();
+    const navigate = useNavigate();
+
     useEffect(() => {
         document.body.classList.add(styles.backgroundImage);
         return () => {
@@ -46,7 +49,9 @@ const RegistrationForm = () => {
                 'Пользователь с таким номером телефона уже существует')
         }
         localStorage.setItem("token", token)
-        //add navigation
+        setTimeout(() => {
+            navigate(routes.root())
+        }, 1000);
     };
 
     return (

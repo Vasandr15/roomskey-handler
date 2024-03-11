@@ -6,10 +6,12 @@ import { MaskedInput } from "antd-mask-input";
 import { getProfile } from "../../API/getProfile.js";
 import { editUser } from "../../API/editUser.js";
 import { Validations } from "../../consts/validations.js";
+import {logOutUser} from "../../API/logOutUser.js";
+import {useNavigate} from "react-router";
+import {routes} from "../../consts/routes.js";
 
 const { Title } = Typography;
 const { useForm } = Form;
-
 const ProfilePage = () => {
     const [logOutLoading, setLoadingLogout] = useState(false);
     const [saveLoading, setLoadingSave] = useState(false);
@@ -17,7 +19,7 @@ const ProfilePage = () => {
     const [form] = useForm();
     const [isEditing, setIsEditing] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -35,11 +37,17 @@ const ProfilePage = () => {
         setTimeout(() => {
             setLoadingLogout(false);
         }, 1000);
-        let response = await logOut();
-        if (response !== null) {
+        let response = await logOutUser();
+        if (response) {
+
             notify('success',
                 'Вы успешно вышли')
-            //navigate to login
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            setTimeout(() => {
+                navigate(routes.login())
+            }, 1000);
+
         }
         else {
             notify('error',
@@ -77,6 +85,11 @@ const ProfilePage = () => {
         form.setFieldsValue(userInfo);
     };
 
+    const handleCancelEdit = () =>{
+        form.setFieldsValue(userInfo);
+        setIsEditing(false)
+    }
+
     return (
         <Row justify="center">
             {contextHolder}
@@ -107,7 +120,7 @@ const ProfilePage = () => {
                                     {isEditing ? (
                                         <Form.Item>
                                             <Button type="primary" htmlType="submit" loading={saveLoading}>Сохранить</Button>
-                                            <Button style={{ marginLeft: 8 }} onClick={() => setIsEditing(false)}>Отменить</Button>
+                                            <Button style={{ marginLeft: 8 }} onClick={handleCancelEdit}>Отменить</Button>
                                         </Form.Item>
                                     ) : (
                                         <Button type="primary" onClick={handleEdit}><EditFilled /> Редактироапть</Button>

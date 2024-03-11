@@ -1,5 +1,5 @@
 const ONLY_LETTERS  = /^[a-zA-Zа-яА-Я]+\s*$/;
-const FULL_NAME = /^[a-zA-Zа-яА-Я]+\s[a-zA-Zа-яА-Я]+\s[a-zA-Zа-яА-Я]+$/
+const FULL_NAME = /^([a-zA-Zа-яА-Я]+\s*?){2,3}$/
 const PHONE_REGEX = /^\+7\s*\(\d{3}\)\s*\d{3}(-\d{2}){2}\s*$/;
 const FILL_IN = 'Заполните поле'
 const ONLY_LETTERS_MESSAGE = 'Вводите только буквы'

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const logOut = async () => {
+export const logOutUser = async () => {
     try {
         const response = await axios.delete(`/api/user/logout`,{
             headers: {

@@ -6,13 +6,14 @@ import {Validations} from "../../consts/validations.js";
 import {routes} from "../../consts/routes.js";
 import {MaskedInput} from "antd-mask-input";
 import {loginUser} from "../../API/loginUser.js";
+import {useNavigate} from "react-router";
 
 const {Title} = Typography;
 const LoginForm = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
-
+    const navigate = useNavigate();
     const notify = (type, message) =>{
         messageApi.open({
             type: type,
@@ -42,8 +43,8 @@ const LoginForm = () => {
         localStorage.setItem("token", token)
         setTimeout(() => {
             setLoading(false);
+            navigate(routes.root());
         }, 1000);
-        //add navigation
     };
 
     return (
