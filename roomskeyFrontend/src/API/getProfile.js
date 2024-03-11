@@ -9,6 +9,7 @@ export const getProfile = async () => {
         });
         console.log('Status:', response.status);
         console.log('Data:', response.data);
+        localStorage.setItem('role', response.data.role);
         return response.data;
     } catch (error) {
         console.error('An error occurred:', error.response ? error.response.status : error.message);
