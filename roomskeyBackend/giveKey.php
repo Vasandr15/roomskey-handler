@@ -24,7 +24,6 @@ function route($method, $urlList, $requestData)
 
             $authHeader = isset($headers['authorization']) ? $headers['authorization'] : null;
             $token = substr($authHeader, 7);
-            $token = substr($headers['Authorization'], 7);
             if (!$token){
                 setHTTPStatus("401", "Unauthorized");
                 break;
