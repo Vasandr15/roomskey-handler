@@ -35,10 +35,12 @@ export default function SubmitReservationSection() {
         }
     };
 
+    const awaitingConfirmationBids = bids.filter(bid => bid.status === 'awaiting confirmation');
+
     return (
         <Flex vertical align="center" justify="center">
             <Flex vertical align="center" justify="center">
-                {bids && bids.map(bid => (
+                {awaitingConfirmationBids && awaitingConfirmationBids.map(bid => (
                     <ReservationCard key={bid.keyId} data={bid} onUpdate={updateBids} />
                 ))}
             </Flex>

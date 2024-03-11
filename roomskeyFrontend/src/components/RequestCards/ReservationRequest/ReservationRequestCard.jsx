@@ -34,7 +34,7 @@ export default function ReservationCard ({ data }) {
                     <p><b>Автор заявки: </b>{data.userName}</p>
                     <p><b>Статус: </b>{data.status}</p>
                 </Flex>
-                <Flex vertical>
+                <Flex vertical justify="space-around">
                     <Button type="primary" onClick={handleAccept}>Подтвердить</Button>
                     <Button type="default" onClick={handleReject}>Отклонить</Button>
                 </Flex>
