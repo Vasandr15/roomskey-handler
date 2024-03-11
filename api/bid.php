@@ -177,7 +177,7 @@
                             $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
 
                             $bid = [
-                                "id" => $buildingFromTheRequest['id'],
+                                "id" => $bidId,
                                 "room" => $buildingFromTheRequest['room'],
                                 "building" => $buildingFromTheRequest['building'],
                                 "date" => $bidFromTheRequest['date'],
@@ -221,7 +221,7 @@
                             $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
 
                             $bid = [
-                                "id" => $buildingFromTheRequest['id'],
+                                "id" => $bidId,
                                 "room" => $buildingFromTheRequest['room'],
                                 "building" => $buildingFromTheRequest['building'],
                                 "date" => $bidFromTheRequest['date'],
