@@ -1,95 +1,124 @@
-import React, {useState} from 'react';
-import {Card, Row, Col, Avatar, Button, Typography, Input, Space} from 'antd';
-import {UserOutlined, EditFilled} from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Card, Row, Col, Avatar, Button, Typography, Input, Space, Form, message, Flex } from 'antd';
+import { UserOutlined, EditFilled } from '@ant-design/icons';
 import styles from './profile.module.css';
+import { MaskedInput } from "antd-mask-input";
+import { getProfile } from "../../API/getProfile.js";
+import { editUser } from "../../API/editUser.js";
+import { Validations } from "../../consts/validations.js";
 
-const {Title} = Typography;
-
+const { Title } = Typography;
+const { useForm } = Form;
 
 const ProfilePage = () => {
-    const [loading, setLoading] = useState(false);
-    const [phone, setPhone] = useState('+7 (913) 827-61-62');
-    const [email, setEmail] = useState('vasandrey007@gmail.com');
-    const [fullName, setFullName] = useState('Васильев Андрей Денисович')
-    const [isEditingPhone, setIsEditingPhone] = useState(false);
-    const [isEditingEmail, setIsEditingEmail] = useState(false);
-    const [isEditingFullName, setIsEditingFullName] = useState(false);
+    const [logOutLoading, setLoadingLogout] = useState(false);
+    const [saveLoading, setLoadingSave] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+    const [form] = useForm();
+    const [isEditing, setIsEditing] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
 
-    const setButtonLoading = () => {
-        setLoading(true);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getProfile();
+                setUserInfo(data);
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const logOut = async () => {
+        setLoadingLogout(true);
         setTimeout(() => {
-            setLoading(false);
-        }, 4000);
+            setLoadingLogout(false);
+        }, 1000);
+        let response = await logOut();
+        if (response !== null) {
+            notify('success',
+                'Вы успешно вышли')
+            //navigate to login
+        }
+        else {
+            notify('error',
+                'Не удалось выйти')
+        }
     };
 
-    const handlePhoneEdit = () => {
-        setIsEditingPhone(!isEditingPhone);
+    const onFinish = async (values) => {
+        setLoadingSave(true);
+        console.log(values);
+        let response = editUser(values)
+        if (response) {
+            notify('success', 'Данные профиля успешно обновлены');
+        }
+        else {
+            notify('error', 'Произошла ошибка при изменеии данных');
+        }
+        setTimeout(() => {
+            setLoadingSave(false);
+            setIsEditing(false);
+            setUserInfo(values);
+
+        }, 1000);
     };
 
-    const handleFullNameEdit = () => {
-        setIsEditingFullName(!isEditingFullName)
+    const notify = (type, message) => {
+        messageApi.open({
+            type: type,
+            content: message,
+        });
     }
-    const handleEmailEdit = () => {
-        setIsEditingEmail(!isEditingEmail);
+
+    const handleEdit = () => {
+        setIsEditing(true);
+        form.setFieldsValue(userInfo);
     };
 
-    const handlePhoneChange = (e) => {
-        setPhone(e.target.value);
-    };
-
-    const handleEmailChange = (e) => {
-        setEmail(e.target.value);
-    };
-    const handleFullNameChange = (e) => {
-        setFullName(e.target.value);
-    };
     return (
         <Row justify="center">
+            {contextHolder}
             <Col md={13}>
                 <Card className={styles.card} md={11}>
                     <Row align="middle">
                         <Col flex="100px">
-                            <Avatar size={120} className={styles.avatar} icon={<UserOutlined/>}/>
+                            <Avatar size={120} className={styles.avatar} icon={<UserOutlined />} />
                         </Col>
-                        <Col flex="auto" style={{marginLeft: '50px'}}>
-                                <Row>
-                                    {isEditingFullName ?
-                                        <Space.Compact>
-                                            <Input value={fullName} onChange={handleFullNameChange} size="large"
-                                                   style={{width: '18em'}}/>
-                                            <Button size="large" type="primary"
-                                                    onClick={handleFullNameEdit}>Сохранить</Button>
-                                        </Space.Compact> :
-                                        <Title>{fullName}<Button type="link" onClick={handleFullNameEdit}>
-                                            {isEditingFullName ? null : <EditFilled/>}
-                                        </Button></Title>}{' '}
-                                </Row>
-                                <div>
-                                    <b>Номер телефона:</b> {isEditingPhone ?
-                                    <Space.Compact>
-                                        <Input value={phone} onChange={handlePhoneChange}
-                                               style={{width: '15em'}}/>
-                                        <Button type="primary" onClick={handlePhoneEdit}>Сохоанить</Button>
-                                    </Space.Compact> : <span>{phone}</span>}{' '}
-                                    <Button type="link" onClick={handlePhoneEdit}>
-                                        {isEditingPhone ? null : <EditFilled/>}
-                                    </Button>
-                                </div>
-                                <div>
-                                    <b>Email:</b> {isEditingEmail ?
-                                    <Space.Compact>
-                                        <Input value={email} onChange={handleEmailChange}
-                                               style={{width: '15em'}}/>
-                                        <Button type="primary" onClick={handleEmailEdit}>Сохранить</Button>
-                                    </Space.Compact>
-                                    : <span>{email}</span>}{' '}
-                                    <Button type="link" onClick={handleEmailEdit}>
-                                        {isEditingEmail ? null : <EditFilled/>}
-                                    </Button>
-                                </div>
-                                <Button style={{marginTop: '10px'}} danger onClick={setButtonLoading} loading={loading}>
-                                    Выйти
-                                </Button>
+                        <Col flex="auto" style={{ marginLeft: '50px' }}>
+                            {userInfo && (
+                                <Form
+                                    form={form}
+                                    onFinish={onFinish}
+                                    initialValues={userInfo}
+                                    style={{ width: '100%' }}
+                                    layout="vertical"
+                                >
+                                    <Form.Item name="name" label="Фио" rules={Validations.editNameValidation()}>
+                                        <Input disabled={!isEditing} />
+                                    </Form.Item>
+                                    <Form.Item name="phone" label="Номер телефона" rules={Validations.phoneValidation()}>
+                                        <MaskedInput mask={"+7 (000) 000-00-00"} disabled={!isEditing} />
+                                    </Form.Item>
+                                    <Form.Item name="email" label="Email" rules={Validations.emailValidation()}>
+                                        <Input disabled={!isEditing} />
+                                    </Form.Item>
+                                    {isEditing ? (
+                                        <Form.Item>
+                                            <Button type="primary" htmlType="submit" loading={saveLoading}>Сохранить</Button>
+                                            <Button style={{ marginLeft: 8 }} onClick={() => setIsEditing(false)}>Отменить</Button>
+                                        </Form.Item>
+                                    ) : (
+                                        <Button type="primary" onClick={handleEdit}><EditFilled /> Редактироапть</Button>
+                                    )}
+                                    <Flex>
+                                        <Button style={{ marginTop: '10px' }} danger onClick={logOut} loading={logOutLoading}>
+                                            Выйти
+                                        </Button>
+                                    </Flex>
+                                </Form>
+                            )}
                         </Col>
                     </Row>
                 </Card>

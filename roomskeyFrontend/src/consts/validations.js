@@ -1,4 +1,5 @@
 const ONLY_LETTERS  = /^[a-zA-Zа-яА-Я]+\s*$/;
+const FULL_NAME = /^[a-zA-Zа-яА-Я]+\s[a-zA-Zа-яА-Я]+\s[a-zA-Zа-яА-Я]+$/
 const PHONE_REGEX = /^\+7\s*\(\d{3}\)\s*\d{3}(-\d{2}){2}\s*$/;
 const FILL_IN = 'Заполните поле'
 const ONLY_LETTERS_MESSAGE = 'Вводите только буквы'
@@ -66,6 +67,10 @@ export const Validations = {
     phoneValidation : () => [
         Validation.requireRule('Введите номер телефона'),
         Validation.inputValidation(PHONE_REGEX, 'Введите действующий номер телефона')
+    ],
+
+    editNameValidation : () =>[
+        Validation.requireRule('Введите ФИО'),
+        Validation.inputValidation(FULL_NAME, 'Введите ФИО корректно')
     ]
 }
-
