@@ -1,16 +1,16 @@
 import axios from "axios";
 
-export const giveKey = async (nextKeeperId) => {
+export const giveKey = async (nextKeeperId, keyId) => {
     try {
         const token = localStorage.getItem("token");
         if (!token) {
             console.error('Token not found in localStorage');
             return null;
         }
-
+        console.log(nextKeeperId)
         const response = await axios.post(
-            '/api/giveKey',
-            { nextKeeperId },
+            `/api/giveKey?id=${keyId}`,
+            { "nextKeeperId": nextKeeperId },
             {
                 headers: {
                     Authorization: `Bearer ${token}`
