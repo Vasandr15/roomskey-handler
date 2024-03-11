@@ -1,18 +1,44 @@
-import classes from './ReservationCard.module.css';
-import {Button} from 'antd';
 
-export default function ReservationCard() {
+import {Button, Card, Flex} from 'antd';
+import {lessons} from "../../../consts/lessons.js";
+import {changeStatus} from "../../../API/changeStatus.js";
+
+export default function ReservationCard ({ data }) {
+    const getLesson = (lessonKey) => {
+        const lesson = lessons.find(item => item.key === parseInt(lessonKey));
+        return lesson ? lesson.label : '';
+    };
+
+    const handleAccept = async () => {
+        try {
+            await changeStatus(data.id, { status: 'accepted' });
+        } catch (error) {
+            console.log(error.text())
+        }
+    };
+
+    const handleReject = async () => {
+        try {
+            await changeStatus(data.id, { status: 'refused' });
+        } catch (error) {
+           console.log(error.text())
+        }
+    };
+
     return (
-        <div className={classes.requstCard}>
-            <div className={classes.info}>
-                <p><span className={classes.spanned}>Аудитории:</span> 123</p>
-                <p><span className={classes.spanned}>Пара:</span> 1 (8:45-10:20)</p>
-                <span><a href="">Перейти в профиль бронирующего</a></span>
-            </div>
-            <div className={classes.controls}>
-                <Button type="primary">Подтвердить</Button>
-                <Button type="default">Отклонить</Button>
-            </div>
-        </div>
-    )
-}
+        <Card style={{ marginTop: '10px' }} size="default">
+            <Flex horizontal>
+                <Flex vertical>
+                    <p>Аудитория: {data.building}-{data.room}</p>
+                    <p>{getLesson(data.time)}</p>
+                    <p><b>Автор заявки: </b>{data.userName}</p>
+                    <p><b>Статус: </b>{data.status}</p>
+                </Flex>
+                <Flex vertical>
+                    <Button type="primary" onClick={handleAccept}>Подтвердить</Button>
+                    <Button type="default" onClick={handleReject}>Отклонить</Button>
+                </Flex>
+            </Flex>
+        </Card>
+    );
+};

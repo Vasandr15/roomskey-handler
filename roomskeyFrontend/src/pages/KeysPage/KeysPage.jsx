@@ -1,13 +1,16 @@
 import {Col, Flex, Pagination, Row} from "antd";
 import KeyCard from "../../components/KeyCard/KeyCard.jsx";
 import KeyFilters from "../../components/KeyFilters/KeyFilters.jsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {getAllKeys} from "../../API/getAllKeys.js";
 
 export default function KeysPage() {
     const [inStock, setInStock] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [keysData, setKeysData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
 
     const handleToggleSwitch = async (checked) => {
         setInStock(checked);
@@ -19,8 +22,18 @@ export default function KeysPage() {
         const data = await getAllKeys(filters);
         if (data) {
             setKeysData(data.keys);
+            setTotalPages(data.pagination.count);
         }
     };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page)
+        handleFilterSubmit({ page, pageSize: 10 });
+    };
+
+    useEffect(() => {
+        handleFilterSubmit({ page: currentPage, pageSize: 10 });
+    }, [currentPage, inStock]);
 
     return (
         <Row justify="center">
@@ -38,7 +51,13 @@ export default function KeysPage() {
                     ))}
                 </Flex>
                 <Flex  align="center" justify="center">
-                    <Pagination defaultCurrent={1} total={50} style={{marginTop: '30px'}}/>
+                    <Pagination
+                        defaultCurrent={1}
+                        current={currentPage}
+                        total={keysData.length} // Assuming 10 items per page
+                        onChange={handlePageChange}
+                        style={{ marginTop: '30px' }}
+                    />
                 </Flex>
             </Col>
         </Row>

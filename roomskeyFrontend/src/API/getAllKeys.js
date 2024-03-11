@@ -27,7 +27,7 @@ export const getAllKeys = async (filters) => {
             }
             //поменять токен
             console.log("запрос сделан")
-            response = await axios.get(url, { params, headers: { Authorization: `Bearer 53963afd-5315-45c1-8d05-f5db2d29ebf8` } });
+            response = await axios.get(url, { params, headers: { Authorization: `Bearer de329f6f-78cd-455f-b530-1b5216218935` } });
         } else {
             response = await axios.get(url, { params });
         }
