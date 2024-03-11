@@ -171,12 +171,13 @@
                             $bidUserId = $row['iduser'];
                             $bidKeyId = $row['idkey'];
                             
-                            $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where id='$bidKeyId'"));
+                            $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT id, room, building FROM keys Where id='$bidKeyId'"));
                             
                             $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status, repeatable FROM keystatus Where id='$bidId'"));
                             $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
 
                             $bid = [
+                                "id" => $buildingFromTheRequest['id'],
                                 "room" => $buildingFromTheRequest['room'],
                                 "building" => $buildingFromTheRequest['building'],
                                 "date" => $bidFromTheRequest['date'],
@@ -216,10 +217,11 @@
                             
                             $buildingFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT room, building FROM keys Where id='$bidKeyId'"));
                             
-                            $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT date, time, status, repeatable FROM keystatus Where id='$bidId'"));
+                            $bidFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT id, date, time, status, repeatable FROM keystatus Where id='$bidId'"));
                             $userFromTheRequest = pg_fetch_assoc(pg_query($Link, "SELECT name, role FROM users Where id='$bidUserId'"));
 
                             $bid = [
+                                "id" => $buildingFromTheRequest['id'],
                                 "room" => $buildingFromTheRequest['room'],
                                 "building" => $buildingFromTheRequest['building'],
                                 "date" => $bidFromTheRequest['date'],

@@ -10,25 +10,29 @@ function route($method, $urlList, $requestData) {
                 $password = hash("sha1", $requestData->body->password);
 
                 if ($phone !== "" && $requestData->body->password !== "") {
-                    $user = pg_fetch_assoc(pg_query($Link, "SELECT id FROM users Where phone='$phone' AND password='$password'"));
-                    if (!is_null($user) and $user !== false) {
-                        $userID = $user['id'];
-                        $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(userid) VALUES ('$userID')");
-
-                        
-                        if (!$tokenInsertResult) {
-                            setHTTPStatus("400", "Bad Request");
-                        } else {
-                            $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE userid='$userID' ORDER BY createtime DESC LIMIT 1"));
-                            http_response_code(200);
-                            $response = array(
-                                    "message" => "User logged in successfully",
-                                    "token" => $token['token']
-                            );
-                            echo json_encode($response);
-                        }
+                    $user = pg_fetch_assoc(pg_query($Link, "SELECT id, role FROM users Where phone='$phone' AND password='$password'"));
+                    if ($user['role'] === 'public') {
+                        setHTTPStatus("403", "Forbidden");
                     } else {
-                        setHTTPStatus("400", "Input data incorrect");
+                        if (!is_null($user) and $user !== false) {
+                            $userID = $user['id'];
+                            $tokenInsertResult = pg_query($Link, "INSERT INTO tokens(userid) VALUES ('$userID')");
+    
+                            
+                            if (!$tokenInsertResult) {
+                                setHTTPStatus("400", "Bad Request");
+                            } else {
+                                $token = pg_fetch_assoc(pg_query($Link, "SELECT token FROM tokens WHERE userid='$userID' ORDER BY createtime DESC LIMIT 1"));
+                                http_response_code(200);
+                                $response = array(
+                                        "message" => "User logged in successfully",
+                                        "token" => $token['token']
+                                );
+                                echo json_encode($response);
+                            }
+                        } else {
+                            setHTTPStatus("400", "Input data incorrect");
+                        }
                     }
                 } else {
                     setHTTPStatus("400", "Input data incorrect");
