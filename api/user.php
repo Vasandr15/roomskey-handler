@@ -153,7 +153,7 @@ function route($method, $urlList, $requestData) {
                     $users = [];
                     while ($row = pg_fetch_assoc($usersInDb)) {
                         $userId = $row['id'];
-                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
+                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT id, name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
                         array_push($users, $userInDb);
                     }
 
@@ -179,7 +179,7 @@ function route($method, $urlList, $requestData) {
                     $users = [];
                     while ($row = pg_fetch_assoc($usersInDb)) {
                         $userId = $row['id'];
-                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
+                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT id, name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
                         array_push($users, $userInDb);
                     }
 
@@ -205,7 +205,7 @@ function route($method, $urlList, $requestData) {
                     $users = [];
                     while ($row = pg_fetch_assoc($usersInDb)) {
                         $userId = $row['id'];
-                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
+                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT id, name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
                         array_push($users, $userInDb);
                     }
 
@@ -230,7 +230,7 @@ function route($method, $urlList, $requestData) {
                     $users = [];
                     while ($row = pg_fetch_assoc($usersInDb)) {
                         $userId = $row['id'];
-                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
+                        $userInDb = pg_fetch_assoc(pg_query($Link, "SELECT id, name, email, phone, role, avatarLink FROM users Where id='$userId'"));;
                         array_push($users, $userInDb);
                     }
 
