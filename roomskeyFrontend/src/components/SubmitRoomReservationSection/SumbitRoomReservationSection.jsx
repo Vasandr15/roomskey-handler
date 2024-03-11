@@ -1,12 +1,50 @@
 import ReservationCard from "../RequestCards/ReservationRequest/ReservationRequestCard.jsx";
-import classes from './SRRS.module.css'
+import { useState, useEffect } from 'react';
+import {getAllBids} from "../../API/getAllBids.js";
+import {Flex, Pagination} from "antd";
 
 export default function SubmitReservationSection() {
+    const [bids, setBids] = useState([]);
+    const [pagination, setPagination] = useState({});
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getAllBids();
+                if (data) {
+                    setBids(data.bids);
+                    setPagination(data.pagination);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const updateBids = async () => {
+        try {
+            const data = await getAllBids();
+            if (data) {
+                setBids(data.bids);
+                setPagination(data.pagination);
+            }
+        } catch (error) {
+            console.error('Error updating bids:', error);
+        }
+    };
+
+    const awaitingConfirmationBids = bids.filter(bid => bid.status === 'awaiting confirmation');
+
     return (
-        <>
-            <div className={classes.requests_sect}>
-                <ReservationCard></ReservationCard>
-            </div>
-        </>
-    )
+        <Flex vertical align="center" justify="center">
+            <Flex vertical align="center" justify="center">
+                {awaitingConfirmationBids && awaitingConfirmationBids.map(bid => (
+                    <ReservationCard key={bid.keyId} data={bid} onUpdate={updateBids} />
+                ))}
+            </Flex>
+            <Pagination defaultCurrent={1} total={50} style={{ marginTop: '30px', marginBottom: '30px' }} />
+        </Flex>
+    );
 }
