@@ -8,10 +8,15 @@ export const roleSelection = [
         label : 'Преподаватель'
     },
     {
-        value: 'deanOffice',
+        value: 'dean',
         label : 'Сотрудник деканата'
     },
     {
         value: 'public',
         label : 'Остальные'
-    }]
+    },
+    {
+        value: 'deleted',
+        label : 'Удаленные'
+    }
+]
