@@ -1,6 +1,7 @@
 import { Row, Card, Col, Tabs, Button  } from 'antd';
 import styles from './allUsers.module.css'
 import UsersList from "../../components/userList/usersList.jsx";
+localStorage.setItem('token', 'c3006a56-ac6b-416a-a747-62c87457be1b')
 const AllUsersPage = () => {
     return(
         <Row justify={'center'}>
@@ -21,7 +22,7 @@ const AllUsersPage = () => {
                             {
                                 key: 'deanOffice',
                                 label: 'Сотрудники деканата',
-                                children: <UsersList role={'deanOffice'}/>
+                                children: <UsersList role={'dean'}/>
                             },
                             {
                                 key: 'public',
