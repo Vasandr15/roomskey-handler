@@ -27,7 +27,7 @@ export const getAllKeys = async (filters) => {
             }
             //поменять токен
             console.log("запрос сделан")
-            response = await axios.get(url, { params, headers: { Authorization: `Bearer de329f6f-78cd-455f-b530-1b5216218935` } });
+            response = await axios.get(url, { params, headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }); //token
         } else {
             response = await axios.get(url, { params });
         }

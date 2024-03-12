@@ -1,10 +1,10 @@
 import axios from "axios";
 
-export const getAllBids = async () => {
+export const getAllBids = async (page = 1) => {
     try {
-        const response = await axios.get(`/api/bid`, {
+        const response = await axios.get(`/api/bid?page=${page}`, {
             headers: {
-                Authorization: `Bearer de329f6f-78cd-455f-b530-1b5216218935`
+                Authorization: `Bearer ${localStorage.getItem('token')}` // token
             }
         });
         console.log('Status:', response.status);

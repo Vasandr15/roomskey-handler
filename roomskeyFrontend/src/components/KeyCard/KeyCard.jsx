@@ -31,7 +31,7 @@ export default function KeyCard({ isCollapsed, data, key }) {
                     },
                 ]}
             />
-            <CustomModal open={isModalOpen} setOpen={setIsModalOpen} />
+            <CustomModal open={isModalOpen} setOpen={setIsModalOpen} keyId={data.id}/>
         </Space>
 
     );

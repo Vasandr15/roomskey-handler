@@ -10,6 +10,7 @@ import React from "react";
 import RequestsPage from "../pages/RequestsPage/RequestsPage.jsx";
 import LayoutWithHeader from "./LayoutWithHeader.jsx";
 import KeysPage from "../pages/KeysPage/KeysPage.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 export const router = createBrowserRouter([
     {
@@ -30,19 +31,19 @@ export const router = createBrowserRouter([
             },
             {
                 path: routes.profile(),
-                element: <ProfilePage/>
+                element: <ProtectedRoute element={<ProfilePage/>} required={false}/>
             },
             {
                 path: routes.users(),
-                element: <AllUsersPage/>
+                element: <ProtectedRoute element={<AllUsersPage/>} required={true}/>
             },
             {
                 path: routes.requests(),
-                element: <RequestsPage/>
+                element: <ProtectedRoute element={<RequestsPage/>} required={true}/>
             },
             {
                 path: routes.keys(),
-                element: <KeysPage/>
+                element: <ProtectedRoute element={<KeysPage/>} required={true}/>
             },
             {
                 path: '*',

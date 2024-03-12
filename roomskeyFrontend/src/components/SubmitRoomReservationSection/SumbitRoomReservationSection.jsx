@@ -1,31 +1,37 @@
 import ReservationCard from "../RequestCards/ReservationRequest/ReservationRequestCard.jsx";
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {getAllBids} from "../../API/getAllBids.js";
 import {Flex, Pagination} from "antd";
+import styles from "../userList/styles.module.css";
 
 export default function SubmitReservationSection() {
+    const [current, setCurrent] = useState(1);
     const [bids, setBids] = useState([]);
-    const [pagination, setPagination] = useState({});
+    const [total, setTotal] = useState(0);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const data = await getAllBids();
-                if (data) {
-                    setBids(data.bids);
-                    setPagination(data.pagination);
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
         fetchData();
-    }, []);
+    }, [current]);
+
+    const onChange = (page) => {
+        setCurrent(page);
+    }
+
+    const fetchData = async () => {
+        try {
+            const data = await getAllBids(current);
+            if (data) {
+                setBids(data.bids);
+                setTotal(data.pagination ? data.pagination.size * data.pagination.count : 0);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
     const updateBids = async () => {
         try {
-            const data = await getAllBids();
+            const data = await getAllBids(current);
             if (data) {
                 setBids(data.bids);
                 setPagination(data.pagination);
@@ -44,7 +50,10 @@ export default function SubmitReservationSection() {
                     <ReservationCard key={bid.keyId} data={bid} onUpdate={updateBids} />
                 ))}
             </Flex>
-            <Pagination defaultCurrent={1} total={50} style={{ marginTop: '30px', marginBottom: '30px' }} />
+
+            {total > 10 ? (
+                <Pagination current={current} onChange={onChange} total={total} style={{ marginTop: '30px', marginBottom: '30px' }} />
+            ) : null}
         </Flex>
     );
 }

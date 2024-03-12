@@ -5,6 +5,7 @@ import styles from './styles.module.css'
 import {changeRole} from "../../API/changeRole.js";
 
 const { Text } = Typography;
+let role = localStorage.getItem('role');
 
 export default function UserCard(props) {
     const [editMode, setEditMode] = useState(false);

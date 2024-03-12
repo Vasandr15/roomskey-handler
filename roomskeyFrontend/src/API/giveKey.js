@@ -7,6 +7,7 @@ export const giveKey = async (nextKeeperId, keyId) => {
             console.error('Token not found in localStorage');
             return null;
         }
+        console.log(token)
         console.log(nextKeeperId)
         const response = await axios.post(
             `/api/giveKey?id=${keyId}`,

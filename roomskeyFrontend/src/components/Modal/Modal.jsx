@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {Modal, Button, Input} from 'antd';
 import ModalUserCard from "../KeyCard/ModalUserCard.jsx";
 import { getUsers } from "../../API/getUsers.js";
+import {giveKey} from "../../API/giveKey.js";
 
-const CustomModal = ({ open, setOpen }) => {
+const CustomModal = ({ open, setOpen, keyId}) => {
     const [usersData, setUsersData] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [filteredUsersData, setFilteredUsersData] = useState([]);
@@ -40,6 +41,7 @@ const CustomModal = ({ open, setOpen }) => {
     }, []);
 
     const handleUserCardClick = (user) => {
+        let response = giveKey(user.id, keyId )
         console.log('Clicked on user card:', user);
     };
 
